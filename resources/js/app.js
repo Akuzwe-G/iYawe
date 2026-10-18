@@ -1,4 +1,5 @@
 import {initIdentifierValidation} from './identifiers';
+import {initBalanceValidation} from './balances';
 import {initWorkflow} from './workflow';
 import {initPwa} from './pwa';
 import Alpine from 'alpinejs';
@@ -102,6 +103,7 @@ for (const box of document.querySelectorAll('[data-signature]')) {
 }
 
 initIdentifierValidation();
+initBalanceValidation();
 initWorkflow();
 initPwa();
 for (const form of document.querySelectorAll('form[data-once]:not([data-workflow])')) {

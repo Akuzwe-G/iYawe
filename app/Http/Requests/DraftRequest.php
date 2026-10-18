@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Support\CardBalances;
 use App\Support\CommuterIdentifiers;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -21,7 +22,7 @@ class DraftRequest extends FormRequest
 
     public function messages(): array
     {
-        return CommuterIdentifiers::messages(is_string($this->input('identification_type')) ? $this->input('identification_type') : null);
+        return CommuterIdentifiers::messages(is_string($this->input('identification_type')) ? $this->input('identification_type') : null) + (CardBalances::forRequest($this) ? CardBalances::messages() : []);
     }
 
     public function after(): array
@@ -37,12 +38,14 @@ class DraftRequest extends FormRequest
 
     public function rules(): array
     {
+        $balanceRules = CardBalances::forRequest($this) ? CardBalances::rules(true) : ['nullable', 'numeric', 'min:0', 'max:999999999999.99', 'decimal:0,2'];
+
         return [
             'revision' => ['required', 'integer', 'min:0'], 'step' => ['required', 'integer', 'in:1,2'],
             'swap_date' => ['sometimes', 'nullable', 'date_format:Y-m-d', 'before_or_equal:today'], 'commuter_name' => ['sometimes', 'nullable', 'string', 'max:180'], 'phone' => ['sometimes', 'nullable', 'string', 'max:25'], 'email' => ['sometimes', 'nullable', 'string', 'max:254'], 'identification_type' => ['sometimes', ...CommuterIdentifiers::typeRules(true)], 'national_id' => ['sometimes', ...CommuterIdentifiers::numberRules(is_string($this->input('identification_type')) ? $this->input('identification_type') : null, true)],
             'location_id' => ['sometimes', 'nullable', 'integer', Rule::exists('locations', 'id')->where('company_id', $this->attributes->get('company')?->id)->where('active', true)],
             'old_card' => ['sometimes', ...CommuterIdentifiers::cardRules(true)], 'new_card' => ['sometimes', ...CommuterIdentifiers::cardRules(true)],
-            'old_balance' => ['sometimes', 'nullable', 'numeric', 'min:0', 'max:999999999999.99', 'decimal:0,2'], 'new_balance' => ['sometimes', 'nullable', 'numeric', 'min:0', 'max:999999999999.99', 'decimal:0,2'],
+            'old_balance' => ['sometimes', ...$balanceRules], 'new_balance' => ['sometimes', ...$balanceRules],
             'reason' => ['sometimes', 'nullable', 'in:lost,damaged,faulty,other'], 'reason_other' => ['sometimes', 'nullable', 'string', 'max:1000'],
         ];
     }

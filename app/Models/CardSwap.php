@@ -16,13 +16,20 @@ class CardSwap extends Model
 
     public const STATUSES = ['draft', 'consent_signed', 'pending_processing', 'processing_unsuccessful', 'completed'];
 
+    protected $attributes = ['balance_validation_version' => 1];
+
     protected $guarded = ['id'];
 
     protected $hidden = ['national_id_hash', 'old_card_hash', 'new_card_hash', 'name_hash', 'pdf_path'];
 
     protected function casts(): array
     {
-        return ['branding_snapshot' => 'encrypted:array', 'commuter_name' => 'encrypted', 'phone' => 'encrypted', 'email' => 'encrypted', 'national_id' => 'encrypted', 'old_card' => 'encrypted', 'new_card' => 'encrypted', 'reason_other' => 'encrypted', 'remarks' => 'encrypted', 'consent_name' => 'encrypted', 'company_name_snapshot' => 'encrypted', 'staff_name_snapshot' => 'encrypted', 'old_balance' => 'decimal:2', 'new_balance' => 'decimal:2', 'swap_date' => 'date', 'consent_signed_at' => 'datetime', 'verified_at' => 'datetime', 'physical_completed_at' => 'datetime', 'completed_at' => 'datetime'];
+        return ['balance_validation_version' => 'integer', 'branding_snapshot' => 'encrypted:array', 'commuter_name' => 'encrypted', 'phone' => 'encrypted', 'email' => 'encrypted', 'national_id' => 'encrypted', 'old_card' => 'encrypted', 'new_card' => 'encrypted', 'reason_other' => 'encrypted', 'remarks' => 'encrypted', 'consent_name' => 'encrypted', 'company_name_snapshot' => 'encrypted', 'staff_name_snapshot' => 'encrypted', 'old_balance' => 'decimal:2', 'new_balance' => 'decimal:2', 'swap_date' => 'date', 'consent_signed_at' => 'datetime', 'verified_at' => 'datetime', 'physical_completed_at' => 'datetime', 'completed_at' => 'datetime'];
+    }
+
+    public function usesWholeRwfBalances(): bool
+    {
+        return $this->balance_validation_version === 1;
     }
 
     public function creator(): BelongsTo

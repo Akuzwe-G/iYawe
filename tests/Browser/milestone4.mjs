@@ -50,7 +50,7 @@ try{
    await page.locator('[data-save-draft]').click();await page.waitForFunction(()=>document.querySelector('[data-save-state]').textContent.includes('Saved to server'));await page.reload();assert.equal(await page.locator('[name=commuter_name]').inputValue(),'Fictional Browser '+language);assert((await page.content()).includes(reference.trim()));
   });
   await check(language==='en'?planned[3]:planned[4],async()=>{
-   await next();await page.locator('[name=old_card]').fill('00ab1234');await page.locator('[name=new_card]').fill('00cd5678');await page.locator('[name=old_balance]').fill('1000.25');await page.locator('[name=new_balance]').fill('1000.25');await page.locator('#reason').selectOption(language==='en'?'lost':'other');if(language==='rw')await page.locator('#reason_other').fill('Fictional other reason');await next();
+   await next();await page.locator('[name=old_card]').fill('00ab1234');await page.locator('[name=new_card]').fill('00cd5678');await page.locator('[name=old_balance]').fill('1000');await page.locator('[name=new_balance]').fill('1000');await page.locator('#reason').selectOption(language==='en'?'lost':'other');if(language==='rw')await page.locator('#reason_other').fill('Fictional other reason');await next();
    await page.locator('#customer_language').selectOption(language);await page.locator('form[action$="/customer"] button').click();await page.waitForLoadState('networkidle');
    assert.equal(await page.locator('html').getAttribute('lang'),language);
    const blocked=await context.request.get(origin+'/reports',{headers:{Accept:'application/json'}});assert.equal(blocked.status(),423);

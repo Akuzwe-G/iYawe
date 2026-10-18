@@ -100,8 +100,8 @@ class StagingAcceptanceTest extends TestCase
             $this->assertSame(1, CardSwap::where('submission_key', $key)->count());
             $this->postJson('/swaps/'.$swap->id.'/steps/1', ['revision' => 0])->assertUnprocessable()->assertJsonValidationErrors(['national_id', 'commuter_name']);
             $this->postJson('/swaps/'.$swap->id.'/steps/1', ['location_id' => Location::where('company_id', $company->id)->value('id'), 'revision' => 0, 'identification_type' => $language === 'en' ? 'passport' : 'foreign_id', 'swap_date' => today()->format('Y-m-d'), 'commuter_name' => 'Fictional Rider', 'phone' => '+250788123456', 'national_id' => '0000000000000123', 'email' => ''])->assertOk();
-            $this->postJson('/swaps/'.$swap->id.'/steps/2', ['revision' => 1, 'old_card' => '00000123', 'new_card' => '00000456', 'old_balance' => '1000.25', 'new_balance' => '1000.25', 'reason' => 'other'])->assertUnprocessable()->assertJsonValidationErrors('reason_other');
-            $this->postJson('/swaps/'.$swap->id.'/steps/2', ['revision' => 1, 'old_card' => '00000123', 'new_card' => '00000456', 'old_balance' => '1000.25', 'new_balance' => '1000.25', 'reason' => 'other', 'reason_other' => 'Fictional acceptance reason'])->assertOk();
+            $this->postJson('/swaps/'.$swap->id.'/steps/2', ['revision' => 1, 'old_card' => '00000123', 'new_card' => '00000456', 'old_balance' => '1000', 'new_balance' => '1000', 'reason' => 'other'])->assertUnprocessable()->assertJsonValidationErrors('reason_other');
+            $this->postJson('/swaps/'.$swap->id.'/steps/2', ['revision' => 1, 'old_card' => '00000123', 'new_card' => '00000456', 'old_balance' => '1000', 'new_balance' => '1000', 'reason' => 'other', 'reason_other' => 'Fictional acceptance reason'])->assertOk();
             $this->post('/swaps/'.$swap->id.'/customer', ['language' => $language])->assertRedirect();
             $this->get('/swaps/'.$swap->id.'/continue')->assertOk()->assertSee('lang="'.$language.'"', false)->assertSee($template['declaration']);
             $this->postJson('/swaps/'.$swap->id.'/steps/3', ['revision' => 2, 'consent_version_id' => $version->id, 'consent_name' => 'Fictional Rider', 'acknowledged' => 1, 'signature' => $this->signature()])->assertOk();
@@ -135,7 +135,7 @@ class StagingAcceptanceTest extends TestCase
             $html = view('swaps.pdf', ['swap' => $swap->load('consentVersion'), 'images' => $images, 'branding' => $branding, 'fontAvailable' => true])->render();
             $this->assertStringContainsString(e($template['declaration']), $html);
             $this->assertStringContainsString(e($template['receipt']), $html);
-            $this->assertStringContainsString('1000.25', $html);
+            $this->assertStringContainsString('1000.00', $html);
             $this->assertStringContainsString(e($swap->identificationTypeLabel()), $html);
             Storage::disk('archive')->put($swap->pdf_path, Crypt::encryptString('tampered'));
             $this->get('/swaps/'.$swap->id.'/pdf')->assertStatus(500);
@@ -222,7 +222,7 @@ class StagingAcceptanceTest extends TestCase
         [$company,$user] = $this->staff();
         foreach (['lost', 'damaged', 'faulty', 'other'] as $reason) {
             $swap = CardSwap::factory()->create(['company_id' => $company->id, 'created_by' => $user->id, 'step' => 2]);
-            $data = ['revision' => 0, 'old_card' => '00000001', 'new_card' => '00000002', 'old_balance' => '123.45', 'new_balance' => '123.45', 'reason' => $reason, 'reason_other' => $reason === 'other' ? 'Fictional reason' : null];
+            $data = ['revision' => 0, 'old_card' => '00000001', 'new_card' => '00000002', 'old_balance' => '123', 'new_balance' => '123', 'reason' => $reason, 'reason_other' => $reason === 'other' ? 'Fictional reason' : null];
             $this->postJson('/swaps/'.$swap->id.'/steps/2', array_replace($data, ['old_balance' => '-1']))->assertUnprocessable()->assertJsonValidationErrors('old_balance');
             $this->postJson('/swaps/'.$swap->id.'/steps/2', array_replace($data, ['new_balance' => '12.345']))->assertUnprocessable()->assertJsonValidationErrors('new_balance');
             $this->postJson('/swaps/'.$swap->id.'/steps/2', array_replace($data, ['new_card' => '00000001']))->assertUnprocessable()->assertJsonValidationErrors('old_card');

@@ -51,7 +51,7 @@ class CommuterIdentifierTest extends TestCase
 
     private function cards(mixed $old, mixed $new = '00CD5678'): array
     {
-        return ['revision' => 0, 'old_card' => $old, 'new_card' => $new, 'old_balance' => '100.25', 'new_balance' => '100.25', 'reason' => 'lost'];
+        return ['revision' => 0, 'old_card' => $old, 'new_card' => $new, 'old_balance' => '100', 'new_balance' => '100', 'reason' => 'lost'];
     }
 
     public function test_valid_card_numbers_are_uppercase_strings_with_leading_zeroes(): void
@@ -155,13 +155,13 @@ class CommuterIdentifierTest extends TestCase
     {
         [$company,$user] = $this->staff();
         $bytes = '%PDF-legacy-immutable';
-        $record = CardSwap::factory()->create(['company_id' => $company->id, 'created_by' => $user->id, 'status' => 'completed', 'national_id' => 'LEGACY-ID', 'old_card' => 'OLD-12345', 'pdf_path' => 'legacy/example.enc', 'pdf_hash' => hash('sha256', $bytes)]);
+        $record = CardSwap::factory()->create(['company_id' => $company->id, 'created_by' => $user->id, 'balance_validation_version' => null, 'status' => 'completed', 'national_id' => 'LEGACY-ID', 'old_card' => 'OLD-12345', 'pdf_path' => 'legacy/example.enc', 'pdf_hash' => hash('sha256', $bytes)]);
         Storage::disk('local')->put($record->pdf_path, Crypt::encryptString($bytes));
         $this->assertSame($bytes, $this->get('/swaps/'.$record->id.'/pdf')->assertOk()->getContent());
         $this->assertNull($record->fresh()->identification_type);
         $this->assertSame('OLD-12345', $record->fresh()->old_card);
         $version = ConsentVersion::create(['company_id' => $company->id, 'language' => 'en', 'version' => 'test-legacy', 'declaration' => config('consent.en.declaration'), 'receipt' => config('consent.en.receipt'), 'approved_by' => $user->id, 'approved_at' => now()]);
-        $unsigned = CardSwap::factory()->create(['company_id' => $company->id, 'created_by' => $user->id, 'step' => 3, 'commuter_name' => 'Fictional Commuter', 'national_id' => 'LEGACY-ID', 'old_card' => 'OLD-12345', 'new_card' => 'NEW-12345']);
+        $unsigned = CardSwap::factory()->create(['company_id' => $company->id, 'created_by' => $user->id, 'balance_validation_version' => null, 'step' => 3, 'commuter_name' => 'Fictional Commuter', 'national_id' => 'LEGACY-ID', 'old_card' => 'OLD-12345', 'new_card' => 'NEW-12345']);
         $this->postJson('/swaps/'.$unsigned->id.'/steps/3', ['revision' => 0, 'consent_version_id' => $version->id, 'consent_name' => 'Fictional Commuter', 'acknowledged' => 1, 'signature' => 'data:image/png;base64,'])->assertUnprocessable()->assertJsonValidationErrors('identification_type');
         $this->assertNull($unsigned->fresh()->consent_signed_at);
         $this->assertSame(0, $unsigned->signatures()->count());
@@ -194,7 +194,7 @@ class CommuterIdentifierTest extends TestCase
     {
         [$company,$user] = $this->staff();
         $version = ConsentVersion::create(['company_id' => $company->id, 'language' => 'en', 'version' => 'historical', 'declaration' => config('consent.en.declaration'), 'receipt' => config('consent.en.receipt'), 'approved_by' => $user->id, 'approved_at' => now()]);
-        $record = CardSwap::factory()->create(['company_id' => $company->id, 'created_by' => $user->id, 'status' => 'pending_processing', 'step' => 5, 'consent_version_id' => $version->id, 'consent_language' => 'en', 'commuter_name' => 'Legacy Rider', 'consent_name' => 'Legacy Rider', 'national_id' => 'LEGACY-ID', 'old_card' => 'old-legacy', 'new_card' => 'new-legacy', 'consent_signed_at' => now(), 'verified_at' => now(), 'physical_completed_at' => now(), 'staff_name_snapshot' => $user->name]);
+        $record = CardSwap::factory()->create(['company_id' => $company->id, 'created_by' => $user->id, 'balance_validation_version' => null, 'status' => 'pending_processing', 'step' => 5, 'consent_version_id' => $version->id, 'consent_language' => 'en', 'commuter_name' => 'Legacy Rider', 'consent_name' => 'Legacy Rider', 'national_id' => 'LEGACY-ID', 'old_card' => 'old-legacy', 'new_card' => 'new-legacy', 'consent_signed_at' => now(), 'verified_at' => now(), 'physical_completed_at' => now(), 'staff_name_snapshot' => $user->name]);
         foreach (['consent', 'staff'] as $purpose) {
             $record->signatures()->create(['company_id' => $company->id, 'captured_by' => $user->id, 'purpose' => $purpose, 'revision' => 1, 'path' => 'legacy/'.$purpose.'.enc', 'sha256' => hash('sha256', 'historical'), 'payload_hash' => hash('sha256', 'historical'), 'payload_snapshot' => ['national_id' => 'LEGACY-ID'], 'signed_at' => now()]);
         }
@@ -248,7 +248,7 @@ class CommuterIdentifierTest extends TestCase
     public function test_unsigned_draft_cannot_bypass_required_location_at_consent(): void
     {
         $record = $this->record(3);
-        $record->forceFill(['commuter_name' => 'Test commuter', 'identification_type' => 'passport', 'national_id' => 'AB123', 'old_card' => '00000001', 'new_card' => '00000002', 'location_id' => null])->save();
+        $record->forceFill(['old_balance' => '100', 'new_balance' => '100', 'commuter_name' => 'Test commuter', 'identification_type' => 'passport', 'national_id' => 'AB123', 'old_card' => '00000001', 'new_card' => '00000002', 'location_id' => null])->save();
         $version = ConsentVersion::create(['company_id' => $record->company_id, 'language' => 'en', 'version' => 'location-test', 'declaration' => 'Test', 'receipt' => 'Test', 'active' => true, 'approved_by' => $record->created_by, 'approved_at' => now()]);
         $this->postJson('/swaps/'.$record->id.'/steps/3', ['revision' => 0, 'consent_version_id' => $version->id, 'consent_name' => $record->commuter_name, 'acknowledged' => 1, 'signature' => 'data:image/png;base64,'])->assertUnprocessable()->assertJsonValidationErrors('location_id');
         $this->assertNull($record->fresh()->consent_signed_at);

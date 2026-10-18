@@ -1,6 +1,6 @@
-const CACHE_NAME = 'iyawe-static-5a879f8f93814ebc';
-const OFFLINE = '/offline.html?v=5a879f8f93814ebc';
-const STATIC_ASSETS = ["/build/assets/app-C6xoTL8Q.css","/build/assets/app-Dyb4BCh9.js","/build/assets/fonts-DMNua-9i.css","/build/assets/montserrat-400-normal-BLhwKU8k.woff2","/build/assets/montserrat-400-normal-xItZbAXg.woff","/build/assets/montserrat-500-normal-DRFEGfly.woff2","/build/assets/montserrat-500-normal-Dok2oTci.woff","/build/assets/montserrat-600-normal-CdhFl4lI.woff","/build/assets/montserrat-600-normal-UVxSCcoG.woff2","/build/assets/montserrat-700-normal-BWkrl476.woff","/build/assets/montserrat-700-normal-BdjcYUrC.woff2","/pwa/icons/icon-192.png?v=5a879f8f93814ebc","/pwa/icons/icon-512.png?v=5a879f8f93814ebc","/pwa/icons/icon-180.png?v=5a879f8f93814ebc","/pwa/icons/maskable-512.png?v=5a879f8f93814ebc","/offline.html?v=5a879f8f93814ebc"];
+const CACHE_NAME = 'iyawe-static-d8b3099a8b32bbb6';
+const OFFLINE = '/offline.html?v=d8b3099a8b32bbb6';
+const STATIC_ASSETS = ["/build/assets/app-Bu3mjW52.js","/build/assets/app-C6xoTL8Q.css","/build/assets/fonts-DMNua-9i.css","/build/assets/montserrat-400-normal-BLhwKU8k.woff2","/build/assets/montserrat-400-normal-xItZbAXg.woff","/build/assets/montserrat-500-normal-DRFEGfly.woff2","/build/assets/montserrat-500-normal-Dok2oTci.woff","/build/assets/montserrat-600-normal-CdhFl4lI.woff","/build/assets/montserrat-600-normal-UVxSCcoG.woff2","/build/assets/montserrat-700-normal-BWkrl476.woff","/build/assets/montserrat-700-normal-BdjcYUrC.woff2","/pwa/icons/icon-192.png?v=d8b3099a8b32bbb6","/pwa/icons/icon-512.png?v=d8b3099a8b32bbb6","/pwa/icons/icon-180.png?v=d8b3099a8b32bbb6","/pwa/icons/maskable-512.png?v=d8b3099a8b32bbb6","/offline.html?v=d8b3099a8b32bbb6"];
 const ALLOWED = new Set(STATIC_ASSETS);
 async function safeAsset(url) {
     const response = await fetch(new Request(url, {credentials:'omit', cache:'no-store'}));

@@ -37,6 +37,9 @@ class SwapWorkflow
                     $swap->step = 2;
                     $this->event($swap, 'draft.updated');
                 } elseif ($step === 2) {
+                    if ($swap->usesWholeRwfBalances()) {
+                        CardBalances::validate($data);
+                    }
                     foreach (['old_card', 'new_card', 'old_balance', 'new_balance', 'reason', 'reason_other'] as $key) {
                         $swap->$key = $data[$key] ?? null;
                     }
@@ -48,6 +51,7 @@ class SwapWorkflow
                     $swap->step = 3;
                     $this->event($swap, 'draft.updated');
                 } elseif ($step === 3) {
+                    CardBalances::validateStored($swap);
                     $identifiers = Validator::make($swap->only(['identification_type', 'national_id', 'old_card', 'new_card']), [
                         'identification_type' => CommuterIdentifiers::typeRules(),
                         'national_id' => CommuterIdentifiers::numberRules($swap->identification_type),
@@ -81,6 +85,7 @@ class SwapWorkflow
                     $swap->remarks = $data['remarks'] ?? null;
                     $swap->status = $data['outcome'] === 'unsuccessful' ? 'processing_unsuccessful' : 'pending_processing';
                     if ($data['outcome'] === 'completed') {
+                        CardBalances::validateStored($swap);
                         $swap->physical_completed_at = now();
                         $swap->step = 5;
                     }
@@ -89,6 +94,7 @@ class SwapWorkflow
                     $this->event($swap, $data['outcome'] === 'completed' ? 'processing.physically_completed' : ($data['outcome'] === 'pending' ? 'processing.pending' : 'processing.unsuccessful'));
                 } else {
                     abort_unless($step === 5 && $swap->physical_completed_at && $swap->verified_at && $swap->signatures()->where('purpose', 'staff')->exists(), 409);
+                    CardBalances::validateStored($swap);
                     $swap->branding_snapshot = app(DocumentBranding::class)->finalise($swap);
                     $swap->completed_at = now();
                     $swap->status = 'completed';

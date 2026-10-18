@@ -74,6 +74,21 @@ try{
   const state=await evaluate(`(()=>{const input=document.querySelector('#national_id');input.value='123';input.dispatchEvent(new Event('input',{bubbles:true}));return {language:document.documentElement.lang,message:input.validationMessage};})()`);
   assert.equal(state.language,'rw');assert(state.message.startsWith('Andika'));
  });
+ await check('Both balances enforce inclusive whole-RWF limits without erasing invalid input',async()=>{
+  await navigate('cards');
+  const states=await evaluate(`['99','100','49999','50000','-1','100.25','100.00','abc'].map(value=>{const old=document.querySelector('#old_balance'),replacement=document.querySelector('#new_balance');old.value=value;replacement.value=value;for(const input of [old,replacement])input.dispatchEvent(new Event('input',{bubbles:true}));return {oldValid:old.checkValidity(),newValid:replacement.checkValidity(),value:old.value,inputMode:old.inputMode};})`);
+  assert.deepEqual(states.map(s=>s.oldValid),[false,true,true,false,false,false,false,false]);assert.deepEqual(states.map(s=>s.newValid),[false,true,true,false,false,false,false,false]);assert.equal(states[5].value,'100.25');assert.equal(states[0].inputMode,'numeric');
+ });
+ await check('Mismatched balances are rejected and corrected values clear the error',async()=>{
+  const state=await evaluate(`(()=>{const old=document.querySelector('#old_balance'),replacement=document.querySelector('#new_balance');old.value='100';replacement.value='101';replacement.dispatchEvent(new Event('input',{bubbles:true}));const mismatch={valid:replacement.checkValidity(),message:replacement.validationMessage,value:replacement.value};replacement.value='100';replacement.dispatchEvent(new Event('input',{bubbles:true}));return {mismatch,corrected:replacement.checkValidity(),old:old.value};})()`);
+  assert.equal(state.mismatch.valid,false);assert(state.mismatch.message.includes('equal'));assert.equal(state.mismatch.value,'101');assert.equal(state.corrected,true);assert.equal(state.old,'100');
+ });
+ await check('Kinyarwanda balance format and equality messages are translated',async()=>{
+  await navigate('cards-rw');
+  const state=await evaluate(`(()=>{const old=document.querySelector('#old_balance'),replacement=document.querySelector('#new_balance');old.value='99';replacement.value='100';old.dispatchEvent(new Event('input',{bubbles:true}));const format=old.validationMessage;old.value='101';old.dispatchEvent(new Event('input',{bubbles:true}));return {format,equal:replacement.validationMessage};})()`);
+  assert(state.format.startsWith('Andika'));assert(state.equal.startsWith('Amafaranga'));
+ });
+
  await check('Both bilingual identifier/card forms fit a narrow mobile screen',async()=>{
   for(const name of ['identification','cards','identification-rw','cards-rw']){
    await navigate(name);await command('Emulation.setDeviceMetricsOverride',{width:320,height:568,deviceScaleFactor:2,mobile:true});assert(await evaluate('document.documentElement.scrollWidth <= innerWidth + 1'),name);

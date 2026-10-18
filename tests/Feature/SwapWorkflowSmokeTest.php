@@ -61,7 +61,7 @@ class SwapWorkflowSmokeTest extends TestCase
         $swap = CardSwap::firstOrFail();
         $this->capture('wizard-step1', $this->get('/swaps/'.$swap->id.'/continue')->getContent());
         $this->post('/swaps/'.$swap->id.'/steps/1', ['location_id' => Location::where('company_id', $swap->company_id)->value('id'), 'revision' => 0, 'identification_type' => 'rwandan_national_id', 'swap_date' => today()->format('Y-m-d'), 'commuter_name' => 'Sample Commuter', 'phone' => '+250788123456', 'national_id' => '0000000000001234'])->assertSessionHasNoErrors();
-        $this->post('/swaps/'.$swap->id.'/steps/2', ['revision' => 1, 'old_card' => '00AB1234', 'new_card' => '00CD9876', 'old_balance' => '1000.25', 'new_balance' => '1000.25', 'reason' => 'damaged'])->assertSessionHasNoErrors();
+        $this->post('/swaps/'.$swap->id.'/steps/2', ['revision' => 1, 'old_card' => '00AB1234', 'new_card' => '00CD9876', 'old_balance' => '1000', 'new_balance' => '1000', 'reason' => 'damaged'])->assertSessionHasNoErrors();
 
         return $swap->fresh();
     }
