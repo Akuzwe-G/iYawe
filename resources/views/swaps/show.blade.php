@@ -9,7 +9,7 @@
 @endif
 <details class="record-details" @if(!$swap->completed_at) open @endif><summary>{{ __('View authorised record details') }}</summary>
 <section class="panel"><h2>{{ __('Commuter information') }}</h2><dl class="detail-grid">
-@foreach(['Commuter full name'=>$swap->commuter_name,'Phone number'=>$swap->phone,'Email address'=>$swap->email,'National ID'=>$swap->national_id,'Location'=>$swap->location?->name] as $label=>$value)<div><dt>{{ __($label) }}</dt><dd>{{ $value ?: '—' }}</dd></div>@endforeach
+@foreach(['Commuter full name'=>$swap->commuter_name,'Phone number'=>$swap->phone,'Email address'=>$swap->email,'Identification type'=>$swap->identificationTypeLabel(),'Identification number'=>$swap->national_id,'Location'=>$swap->location?->name] as $label=>$value)<div><dt>{{ __($label) }}</dt><dd>{{ $value ?: '—' }}</dd></div>@endforeach
 </dl></section>
 <section class="panel"><h2>{{ __('Card information') }}</h2><dl class="detail-grid">
 @foreach(['Existing card number'=>$swap->old_card,'Replacement card number'=>$swap->new_card,'Existing card balance (RWF)'=>$swap->old_balance,'Replacement card balance (RWF)'=>$swap->new_balance,'Reason'=>$swap->reason?__($swap->reason):null,'Other reason'=>$swap->reason_other,'Remarks'=>$swap->remarks] as $label=>$value)<div><dt>{{ __($label) }}</dt><dd>{{ $value ?? '—' }}</dd></div>@endforeach

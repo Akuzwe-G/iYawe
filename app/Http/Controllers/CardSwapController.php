@@ -170,7 +170,7 @@ class CardSwapController extends Controller
     public function search(Request $request, SwapQuery $queries): RedirectResponse
     {
         $queries->filters($queries->visible($request), $request);
-        $criteria = $request->only(['search', 'search_by', 'from', 'to', 'status', 'reason', 'staff', 'location']);
+        $criteria = $request->only(['search', 'search_by', 'identification_type', 'from', 'to', 'status', 'reason', 'staff', 'location']);
         $request->session()->put('swap_search', Crypt::encryptString(json_encode(['company_id' => $request->attributes->get('company')->id, 'criteria' => $criteria], JSON_THROW_ON_ERROR)));
 
         return redirect()->route('swaps.index', ['searching' => 1]);

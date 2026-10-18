@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Company;
+use App\Models\Location;
 use App\Models\User;
 use App\Support\CompanyAccess;
 use Illuminate\Database\Seeder;
@@ -22,6 +23,7 @@ class AcceptanceSeeder extends Seeder
         foreach (['a', 'b'] as $slug) {
             $company = Company::firstOrCreate(['slug' => 'acceptance-'.$slug], ['name' => 'Fictional Company '.strtoupper($slug), 'status' => 'active']);
             CompanyAccess::provision($company);
+            Location::firstOrCreate(['company_id' => $company->id, 'name' => 'Fictional service location'], ['active' => true]);
             foreach (['admin' => 'Company Administrator', 'field' => 'Field Staff'] as $name => $roleName) {
                 $user = User::updateOrCreate(['email' => $name.'-'.$slug.'@example.test'], ['name' => 'Fictional '.$name.' '.strtoupper($slug), 'password' => $password, 'active' => true, 'locale' => 'en']);
                 $company->users()->syncWithoutDetaching([$user->id => ['active' => true, 'pending' => false]]);

@@ -31,7 +31,7 @@ class DraftController extends Controller
             $record = CardSwap::where('company_id', $record->company_id)->lockForUpdate()->findOrFail($record->id);
             abort_unless($record->status === 'draft' && ! $record->consent_signed_at && ! $record->signatures()->exists(), 409, __('Signed records cannot be autosaved.'));
             abort_unless($record->revision === (int) $data['revision'] && $record->step === (int) $data['step'], 409, __('This record changed. Reload before continuing.'));
-            $keys = $record->step === 1 ? ['swap_date', 'commuter_name', 'phone', 'email', 'national_id', 'location_id'] : ['old_card', 'new_card', 'old_balance', 'new_balance', 'reason', 'reason_other'];
+            $keys = $record->step === 1 ? ['swap_date', 'commuter_name', 'phone', 'email', 'identification_type', 'national_id', 'location_id'] : ['old_card', 'new_card', 'old_balance', 'new_balance', 'reason', 'reason_other'];
             $changed = false;
             foreach ($keys as $key) {
                 if (array_key_exists($key, $data)) {

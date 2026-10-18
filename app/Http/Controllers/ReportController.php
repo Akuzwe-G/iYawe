@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\CardSwap;
 use App\Models\Location;
 use App\Support\Audit;
+use App\Support\CommuterIdentifiers;
 use App\Support\DocumentBranding;
 use App\Support\SwapAnalytics;
 use App\Support\SwapQuery;
@@ -55,9 +56,9 @@ class ReportController extends Controller
                 fputcsv($output, [__($label), $summary[$key]], ',', '"', '');
             }
             fputcsv($output, [], ',', '"', '');
-            fputcsv($output, array_map(fn ($s) => __($s), ['Reference', 'Date', 'Status', 'Reason', 'Staff', 'Location']), ',', '"', '');
+            fputcsv($output, array_map(fn ($s) => __($s), ['Reference', 'Date', 'Status', 'Reason', 'Staff', 'Location', 'Identification type']), ',', '"', '');
             foreach ($query->lazyById(200) as $swap) {
-                $values = [$swap->reference, $swap->swap_date?->format('Y-m-d'), __($swap->status), __($swap->reason ?? 'draft'), $swap->creator?->name, $swap->location?->name];
+                $values = [$swap->reference, $swap->swap_date?->format('Y-m-d'), __($swap->status), __($swap->reason ?? 'draft'), $swap->creator?->name, $swap->location?->name, CommuterIdentifiers::label($swap->identification_type)];
                 $values = array_map(fn ($v) => preg_match('/^(?:\s*[=+@\-]|[\t\r\n])/', (string) $v) ? "'".$v : $v, $values);
                 fputcsv($output, $values, ',', '"', '');
             }

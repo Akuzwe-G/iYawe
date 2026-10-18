@@ -1,3 +1,4 @@
+import {initIdentifierValidation} from './identifiers';
 import {initWorkflow} from './workflow';
 import {initPwa} from './pwa';
 import Alpine from 'alpinejs';
@@ -100,6 +101,7 @@ for (const box of document.querySelectorAll('[data-signature]')) {
     });
 }
 
+initIdentifierValidation();
 initWorkflow();
 initPwa();
 for (const form of document.querySelectorAll('form[data-once]:not([data-workflow])')) {

@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\CardSwap;
 use App\Models\Company;
 use App\Models\ConsentVersion;
+use App\Models\Location;
 use App\Models\User;
 use App\Support\CompanyAccess;
 use App\Support\DocumentBranding;
@@ -25,6 +26,7 @@ class SwapWorkflowSmokeTest extends TestCase
         Storage::fake('local');
         $company = Company::factory()->create();
         CompanyAccess::provision($company);
+        Location::create(['company_id' => $company->id, 'name' => 'Test service location', 'active' => true]);
         $user = User::factory()->create();
         $company->users()->attach($user->id, ['active' => true]);
         setPermissionsTeamId($company->id);
@@ -58,8 +60,8 @@ class SwapWorkflowSmokeTest extends TestCase
         $this->post('/swaps', ['submission_key' => (string) Str::uuid()])->assertRedirect();
         $swap = CardSwap::firstOrFail();
         $this->capture('wizard-step1', $this->get('/swaps/'.$swap->id.'/continue')->getContent());
-        $this->post('/swaps/'.$swap->id.'/steps/1', ['revision' => 0, 'swap_date' => today()->format('Y-m-d'), 'commuter_name' => 'Sample Commuter', 'phone' => '+250788123456', 'national_id' => 'TEST-12345'])->assertSessionHasNoErrors();
-        $this->post('/swaps/'.$swap->id.'/steps/2', ['revision' => 1, 'old_card' => 'OLD-12345', 'new_card' => 'NEW-98765', 'old_balance' => '1000.25', 'new_balance' => '1000.25', 'reason' => 'damaged'])->assertSessionHasNoErrors();
+        $this->post('/swaps/'.$swap->id.'/steps/1', ['location_id' => Location::where('company_id', $swap->company_id)->value('id'), 'revision' => 0, 'identification_type' => 'rwandan_national_id', 'swap_date' => today()->format('Y-m-d'), 'commuter_name' => 'Sample Commuter', 'phone' => '+250788123456', 'national_id' => '0000000000001234'])->assertSessionHasNoErrors();
+        $this->post('/swaps/'.$swap->id.'/steps/2', ['revision' => 1, 'old_card' => '00AB1234', 'new_card' => '00CD9876', 'old_balance' => '1000.25', 'new_balance' => '1000.25', 'reason' => 'damaged'])->assertSessionHasNoErrors();
 
         return $swap->fresh();
     }
@@ -84,7 +86,7 @@ class SwapWorkflowSmokeTest extends TestCase
         $swap = $swap->fresh();
         $this->assertSame('completed', $swap->status);
         $this->assertCount(3, $swap->signatures);
-        $this->assertStringNotContainsString('TEST-12345', $swap->getRawOriginal('national_id'));
+        $this->assertStringNotContainsString('0000000000001234', $swap->getRawOriginal('national_id'));
         $this->assertFalse(str_starts_with(Storage::disk('local')->get($swap->signatures->first()->path), chr(137).'PNG'));
         $this->get('/swaps/'.$swap->id)->assertOk()->assertSee('Sample Commuter');
         $this->get('/swaps/'.$swap->id.'/signatures/'.$swap->signatures->first()->id)->assertOk()->assertHeader('Content-Type', 'image/png');
@@ -97,10 +99,10 @@ class SwapWorkflowSmokeTest extends TestCase
         $this->assertSame($originalPdfHash, $swap->fresh()->pdf_hash);
         $this->assertSame('Original Legal Name', app(DocumentBranding::class)->historical($swap->fresh())['legal_name']);
         $this->get('/records')->assertOk();
-        $this->post('/records/search', ['search_by' => 'national_id', 'search' => 'TEST-12345'])->assertRedirect('/records?searching=1');
+        $this->post('/records/search', ['search_by' => 'national_id', 'search' => '0000000000001234'])->assertRedirect('/records?searching=1');
         $this->get('/records?searching=1')->assertOk()->assertSee($swap->reference);
         $this->get('/reports')->assertOk();
-        $this->get('/reports/export')->assertOk()->assertDontSee('TEST-12345');
+        $this->get('/reports/export')->assertOk()->assertDontSee('0000000000001234');
         $this->get('/dashboard')->assertOk()->assertSee('Swap activity')->assertViewHas('metrics', fn ($metrics) => $metrics[0][1] === 1 && $metrics[1][1] === 1);
         $this->capture('dashboard-en', $this->get('/dashboard')->getContent());
         $user->forceFill(['locale' => 'rw'])->save();

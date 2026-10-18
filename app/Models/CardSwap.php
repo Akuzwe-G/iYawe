@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\CommuterIdentifiers;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -62,6 +63,11 @@ class CardSwap extends Model
     public static function fingerprint(string $value): string
     {
         return hash_hmac('sha256', mb_strtolower(preg_replace('/\s+/u', '', trim($value))), config('app.key'));
+    }
+
+    public function identificationTypeLabel(): string
+    {
+        return CommuterIdentifiers::label($this->identification_type);
     }
 
     public function maskedCard(?string $value): string

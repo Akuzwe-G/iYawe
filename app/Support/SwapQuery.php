@@ -5,6 +5,7 @@ namespace App\Support;
 use App\Models\CardSwap;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class SwapQuery
 {
@@ -18,17 +19,17 @@ class SwapQuery
 
     public function filters(Builder $query, Request $request): Builder
     {
-        $request->validate(['search' => ['nullable', 'string', 'max:180'], 'search_by' => ['nullable', 'in:reference,national_id,old_card,new_card,name'], 'from' => ['nullable', 'date_format:Y-m-d'], 'to' => ['nullable', 'date_format:Y-m-d', 'after_or_equal:from'], 'status' => ['nullable', 'in:'.implode(',', CardSwap::STATUSES)], 'reason' => ['nullable', 'in:lost,damaged,faulty,other'], 'staff' => ['nullable', 'integer'], 'location' => ['nullable', 'integer']]);
+        $request->validate(['search' => ['nullable', 'string', 'max:180'], 'identification_type' => ['nullable', Rule::in([...array_keys(CommuterIdentifiers::TYPES), 'legacy'])], 'search_by' => ['nullable', 'in:reference,national_id,identification_number,old_card,new_card,name'], 'from' => ['nullable', 'date_format:Y-m-d'], 'to' => ['nullable', 'date_format:Y-m-d', 'after_or_equal:from'], 'status' => ['nullable', 'in:'.implode(',', CardSwap::STATUSES)], 'reason' => ['nullable', 'in:lost,damaged,faulty,other'], 'staff' => ['nullable', 'integer'], 'location' => ['nullable', 'integer']]);
 
         return $query->when($request->filled('search'), function ($q) use ($request) {
             $by = $request->input('search_by', 'reference');
             $value = trim($request->input('search'));
-            $by === 'reference' ? $q->where('reference', $value) : $q->where($by === 'name' ? 'name_hash' : $by.'_hash', CardSwap::fingerprint($value));
-        })->when($request->filled('from'), fn ($q) => $q->whereDate('swap_date', '>=', $request->input('from')))
+            $by === 'reference' ? $q->where('reference', $value) : $q->where($by === 'name' ? 'name_hash' : ($by === 'identification_number' ? 'national_id_hash' : $by.'_hash'), CardSwap::fingerprint($value));
+        })->when($request->filled('identification_type'), fn ($q) => $request->input('identification_type') === 'legacy' ? $q->whereNull('identification_type') : $q->where('identification_type', $request->input('identification_type')))->when($request->filled('from'), fn ($q) => $q->whereDate('swap_date', '>=', $request->input('from')))
             ->when($request->filled('to'), fn ($q) => $q->whereDate('swap_date', '<=', $request->input('to')))
             ->when($request->filled('status'), fn ($q) => $q->where('status', $request->input('status')))
             ->when($request->filled('reason'), fn ($q) => $q->where('reason', $request->input('reason')))
             ->when($request->filled('staff'), fn ($q) => $q->where('created_by', $request->integer('staff')))
-            ->when($request->filled('location'), fn ($q) => $q->where('location_id',$request->integer('location')));
+            ->when($request->filled('location'), fn ($q) => $q->where('location_id', $request->integer('location')));
     }
 }

@@ -7,6 +7,7 @@ use App\Models\ConsentVersion;
 use App\Models\SwapEvent;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Throwable;
@@ -28,7 +29,7 @@ class SwapWorkflow
                 abort_if(in_array($swap->status, ['completed', 'processing_unsuccessful']), 409);
                 abort_unless($step === $swap->step, 409);
                 if ($step === 1) {
-                    foreach (['swap_date', 'commuter_name', 'phone', 'email', 'national_id', 'location_id'] as $key) {
+                    foreach (['swap_date', 'commuter_name', 'phone', 'email', 'identification_type', 'national_id', 'location_id'] as $key) {
                         $swap->$key = $data[$key] ?? null;
                     }
                     $swap->national_id_hash = CardSwap::fingerprint($data['national_id']);
@@ -47,6 +48,18 @@ class SwapWorkflow
                     $swap->step = 3;
                     $this->event($swap, 'draft.updated');
                 } elseif ($step === 3) {
+                    $identifiers = Validator::make($swap->only(['identification_type', 'national_id', 'old_card', 'new_card']), [
+                        'identification_type' => CommuterIdentifiers::typeRules(),
+                        'national_id' => CommuterIdentifiers::numberRules($swap->identification_type),
+                        'old_card' => [...CommuterIdentifiers::cardRules(), 'different:new_card'],
+                        'new_card' => [...CommuterIdentifiers::cardRules(), 'different:old_card'],
+                    ]);
+                    if ($identifiers->fails()) {
+                        throw ValidationException::withMessages(['identification_type' => __('Review commuter and card details before signing. Use Back to update this unsigned draft.')]);
+                    }
+                    if (! $swap->location || ! $swap->location->active || $swap->location->company_id !== $swap->company_id) {
+                        throw ValidationException::withMessages(['location_id' => __('Choose an active location before signing. Use Back to update this unsigned draft.')]);
+                    }
                     $consent = ConsentVersion::where('company_id', $swap->company_id)->where('active', true)->findOrFail($data['consent_version_id']);
                     if (mb_strtolower(trim($data['consent_name'])) !== mb_strtolower(trim($swap->commuter_name))) {
                         throw ValidationException::withMessages(['consent_name' => __('The signing name must match the commuter name.')]);

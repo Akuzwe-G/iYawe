@@ -44,12 +44,13 @@ try{
  for(const language of ['en','rw']){
   await go('/swaps/create');await page.locator('form[action$="/swaps"] button').click();await page.waitForURL('**/continue');
   const id=page.url().match(/swaps\/(\d+)/)[1],reference=await page.locator('.eyebrow').last().textContent();
-  await page.locator('[name=commuter_name]').fill('Fictional Browser '+language);await page.locator('[name=phone]').fill('+250788123456');await page.locator('[name=national_id]').fill('0000BROWSER'+language);
+  await page.locator('#location_id').selectOption({label:'Fictional service location'});
+  await page.locator('[name=commuter_name]').fill('Fictional Browser '+language);await page.locator('[name=phone]').fill('+250788123456');await page.locator('[name=national_id]').fill(language==='en'?'0000000000001234':'0000000000005678');
   await check(language==='en'?planned[2]:'Kinyarwanda draft recovery',async()=>{
    await page.locator('[data-save-draft]').click();await page.waitForFunction(()=>document.querySelector('[data-save-state]').textContent.includes('Saved to server'));await page.reload();assert.equal(await page.locator('[name=commuter_name]').inputValue(),'Fictional Browser '+language);assert((await page.content()).includes(reference.trim()));
   });
   await check(language==='en'?planned[3]:planned[4],async()=>{
-   await next();await page.locator('[name=old_card]').fill('0000OLD'+language);await page.locator('[name=new_card]').fill('0000NEW'+language);await page.locator('[name=old_balance]').fill('1000.25');await page.locator('[name=new_balance]').fill('1000.25');await page.locator('#reason').selectOption(language==='en'?'lost':'other');if(language==='rw')await page.locator('#reason_other').fill('Fictional other reason');await next();
+   await next();await page.locator('[name=old_card]').fill('00ab1234');await page.locator('[name=new_card]').fill('00cd5678');await page.locator('[name=old_balance]').fill('1000.25');await page.locator('[name=new_balance]').fill('1000.25');await page.locator('#reason').selectOption(language==='en'?'lost':'other');if(language==='rw')await page.locator('#reason_other').fill('Fictional other reason');await next();
    await page.locator('#customer_language').selectOption(language);await page.locator('form[action$="/customer"] button').click();await page.waitForLoadState('networkidle');
    assert.equal(await page.locator('html').getAttribute('lang'),language);
    const blocked=await context.request.get(origin+'/reports',{headers:{Accept:'application/json'}});assert.equal(blocked.status(),423);

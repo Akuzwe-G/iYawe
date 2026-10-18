@@ -13,6 +13,7 @@
 <p>{{ __('Generated at') }}: {{ now()->format('d M Y H:i') }} {{ config('app.timezone') }}</p>
 <p>{{ __('Period') }}: {{ request('from')?:__('All dates') }} — {{ request('to')?:__('All dates') }}</p>
 @foreach(['status'=>'Status','reason'=>'Reason'] as $key=>$label)@if(request()->filled($key))<p>{{ __($label) }}: {{ __(request($key)) }}</p>@endif @endforeach
+@if(request()->filled('identification_type'))<p>{{ __('Identification type') }}: {{ \App\Support\CommuterIdentifiers::label(request('identification_type')==='legacy'?null:request('identification_type')) }}</p>@endif
 <table><thead><tr><th>{{ __('Category') }}</th><th>{{ __('Count') }}</th></tr></thead><tbody>@foreach(['total'=>'Total acknowledgements','completed'=>'Completed','pending'=>'Pending','unsuccessful'=>'Unsuccessful','completion_rate'=>'Completion rate'] as $key=>$label)<tr><td>{{ __($label) }}</td><td>{{ $summary[$key] }}{{ $key==='completion_rate'?'%':'' }}</td></tr>@endforeach</tbody></table>
 <p><small>{{ __('This report contains company-level aggregates. Customer identification and signatures are not included.') }}</small></p>
 @include('documents.footer')<p><small>iYawe · {{ __('Digital acknowledgements, made simple.') }}</small></p>

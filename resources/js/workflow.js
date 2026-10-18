@@ -13,6 +13,21 @@ export function initWorkflow() {
     const header = document.querySelector('.topbar');
     if (header) new ResizeObserver(() => document.documentElement.style.setProperty('--topbar-height', header.getBoundingClientRect().height + 'px')).observe(header);
     for (const form of document.querySelectorAll('[data-workflow]')) {
+        const locationSelect = form.querySelector('#location_id');
+        if (locationSelect) {
+            const error = form.querySelector('#location_id_error');
+            const validateLocation = (show = false) => {
+                const message = locationSelect.value ? '' : locationSelect.dataset.requiredMessage;
+                locationSelect.setCustomValidity(message);
+                if (show) {
+                    error.textContent = message; error.hidden = !message;
+                    locationSelect.setAttribute('aria-invalid', String(!!message));
+                }
+            };
+            locationSelect.addEventListener('change', () => validateLocation(true));
+            locationSelect.addEventListener('invalid', () => validateLocation(true));
+            validateLocation();
+        }
         let dirty = false, timer, saving = null, busy = false, conflict = false, generation = 0, navigating = false;
         const auto = form.dataset.autosave === 'true';
         const state = form.querySelector('[data-save-state]');
