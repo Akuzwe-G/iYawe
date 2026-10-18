@@ -18,5 +18,21 @@ By signing below, I confirm that I have read, understood, and agreed to the abov
 CONSENT,
         'receipt' => 'I confirm that I have received/accepted the replacement card and acknowledge the completion of the card swap.',
     ],
-    'rw' => ['version' => 'approval-required', 'declaration' => '', 'receipt' => ''],
+    'rw' => [
+        'version' => 'tapgo-rw-1.0',
+        'declaration' => <<<'CONSENT'
+Njyewe, umugenzi ushyize umukono kuri iyi fishi, ndemeza ko nasobanuriwe uburyo bwo guhindurirwa ikarita ya Tap&Go, kandi ko nemeye ku bushake bwanjye ko ikarita yanjye ihindurwa nk'uko byasobanuwe haruguru.
+
+Ndemeza ko:
+- Natanze amakuru yose asabwa kandi nkemeza ko ari ukuri.
+- Nemereye AC Mobility / Tap&Go kunkorera igikorwa cyo guhindurirwa ikarita.
+- Nsobanukiwe ko ikarita yanjye isanzwe yavuzwe haruguru ishobora guhagarikwa cyangwa ntikomeze gukoreshwa nyuma y'uko igikorwa cyo kuyihindura kirangiye neza.
+- Nsobanukiwe ko amafaranga asigaye ku ikarita n'andi makuru y'ikarita yemerewe kwimurwa azashyirwa ku ikarita nshya hakurikijwe amabwiriza agenga imicungire y'amakarita.
+- Nahawe umwanya wo kubaza ibibazo bijyanye n'igikorwa cyo guhindurirwa ikarita, kandi mpabwa ibisobanuro nari nkeneye.
+- Nemeye ku bushake bwanjye guhindurirwa ikarita, kandi nemeza ko iki gikorwa gikozwe mbizi kandi mbyemeye.
+
+Mu gushyira umukono hano hasi, ndemeza ko nasomye, nasobanukiwe kandi nemeye ibikubiye muri iyi fishi, kandi mpaye AC Mobility / Tap&Go uburenganzira bwo gukomeza igikorwa cyo guhindurirwa ikarita.
+CONSENT,
+        'receipt' => 'Ndemeza ko nahawe kandi nakiriye ikarita nshya isimbura iya mbere, kandi ko igikorwa cyo guhindurirwa ikarita cyarangiye.',
+    ],
 ];

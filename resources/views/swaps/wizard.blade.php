@@ -28,7 +28,7 @@
 @else
 <div x-data="{selected: @js((string)old('consent_version_id',$consents->first()->id))}">
 <label for="consent_version_id">{{ __('Customer consent language') }}</label><select id="consent_version_id" name="consent_version_id" x-model="selected">@foreach($consents as $consent)<option value="{{ $consent->id }}">{{ $consent->language==='en'?'English':'Kinyarwanda' }} · {{ $consent->version }}</option>@endforeach</select>@error('consent_version_id')<p class="field-error">{{ $message }}</p>@enderror
-@foreach($consents as $consent)<div x-show="selected==='{{ $consent->id }}'" class="consent-copy" lang="{{ $consent->language }}"><h3>TAP&GO COMMUTER CARD SWAP CONSENT AND AUTHORIZATION FORM</h3><p>{{ $consent->declaration }}</p></div>@endforeach
+@foreach($consents as $consent)<div x-show="selected==='{{ $consent->id }}'" class="consent-copy" lang="{{ $consent->language }}"><h3>{{ __('TAP&GO COMMUTER CARD SWAP CONSENT AND AUTHORIZATION FORM', [], $consent->language) }}</h3><p>{{ $consent->declaration }}</p></div>@endforeach
 <p class="helper">{{ __('The consent language is independent of the staff interface language.') }}</p>
 <x-swap-input name="consent_name" label="Commuter full name" :value="$swap->commuter_name" :required="true" maxlength="180"/>
 <label class="check-row"><input type="checkbox" name="acknowledged" value="1" required>{{ __('I have read and agree to the declaration displayed above.') }}</label>

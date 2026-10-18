@@ -27,11 +27,11 @@ Dependencies: barryvdh/laravel-dompdf 3.1.2, dompdf 3.1.6, Chart.js 4.5.1 and Si
 ## Enable applicable approved consent
 
 1. Sign in as the relevant Company Administrator, select the company and open **Consent versions**.
-2. Read the supplied English Tap&Go declaration and receipt text. They preserve the wording provided by the project owner, including the reference to **AC Mobility / Tap&Go**.
+2. Select English or Kinyarwanda and read the supplied Tap&Go declaration and receipt text. They preserve the wording provided by the project owner, including the reference to **AC Mobility / Tap&Go**.
 3. Confirm that the exact wording is approved and applies to this company, then publish its version.
-4. Staff can now select English consent independently of an English or Kinyarwanda interface.
+4. Staff can now select the published English or Kinyarwanda consent independently of their interface language.
 
-No consent is activated automatically for unrelated organisations. No Kinyarwanda legal declaration was supplied, so its template remains empty and cannot be signed. An authorised company administrator may publish an independently approved translation or organisation-specific declaration through the same interface. Each publication creates a new version and retires the previous version for new signings. Previously signed records retain their original immutable declaration.
+No consent is activated automatically for unrelated organisations. The project owner supplied the exact Kinyarwanda declaration and receipt wording, available as tapgo-rw-1.0 alongside tapgo-en-1.0. Both language templates require publication for the applicable company before new signings. An authorised company administrator may publish an independently approved translation or organisation-specific declaration through the same interface. Each publication creates a new version and retires the previous version for new signings. Previously signed records retain their original immutable declaration.
 
 Operators may alternatively publish a completed configuration template for a specific company:
 
@@ -133,7 +133,7 @@ The implementation uses a small new smoke test file rather than a comprehensive 
 
 The browser review uses synthetic rendered fixtures, not customer data. It covers login in both languages, company dashboards, commuter form and consent/signature form at 320×568, 360×640, 375×667, 390×844, 430×932, 768×1024 and 1280×900, plus signature preservation after expansion/rotation. Results are stored locally under storage/app/milestone2-mobile-review.json.
 
-Final command results are reported in the delivery message. These checks do not constitute comprehensive testing. The later dedicated phase should include real Android/iPhone/Safari devices and styluses, concurrency/load/fault recovery, larger production-like datasets, print layout review and a native-speaker translation review. Approved Kinyarwanda legal text remains outstanding; it is not substituted with generated wording.
+Final command results are reported in the delivery message. These checks do not constitute comprehensive testing. The later dedicated phase should include real Android/iPhone/Safari devices and styluses, concurrency/load/fault recovery, larger production-like datasets, print layout review and a native-speaker translation review. The supplied Kinyarwanda legal wording is preserved rather than substituted with generated text.
 
 ## Final verification results
 
@@ -145,3 +145,9 @@ Final command results are reported in the delivery message. These checks do not 
 - Headless Edge fixture review: **43 checks passed**, no recorded browser errors, no horizontal page overflow at the sampled widths, login contained within the sampled phone heights, and signature data retained through expansion/rotation.
 
 No known implementation errors remained in these checks. This is limited smoke/regression/browser verification; comprehensive testing and real Android/iPhone/Safari/stylus testing remain for the later dedicated phase.
+
+## Kinyarwanda consent update
+
+The supplied title, six consent points, commuter declaration and receipt text are now available in Kinyarwanda. Company Administrators select Kinyarwanda under Consent versions and publish tapgo-rw-1.0. Existing signed versions are preserved. The consent heading and PDF language follow the customer consent language, even when the staff interface is English.
+
+Focused verification: KinyarwandaConsentTest passed (1 test, 20 assertions), including PDF generation with Montserrat and immutable published wording.

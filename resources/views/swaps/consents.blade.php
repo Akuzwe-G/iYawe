@@ -2,7 +2,7 @@
 @section('title',__('Consent versions'))
 @section('content')
 <div class="page-heading"><div><span class="eyebrow">{{ $activeCompany->name }}</span><h1>{{ __('Consent versions') }}</h1><p>{{ __('Publish approved wording for this company. Existing signed declarations are never changed.') }}</p></div></div>
-<section class="panel form-panel"><h2>{{ __('Publish approved declaration') }}</h2><p>{{ __('The supplied English Tap&Go wording names AC Mobility / Tap&Go. Enable it only where it applies. Kinyarwanda legal text must be supplied and approved before use.') }}</p>
+<section class="panel form-panel"><h2>{{ __('Publish approved declaration') }}</h2><p>{{ __('The supplied English and Kinyarwanda Tap&Go declarations name AC Mobility / Tap&Go. Publish the applicable language version for this company.') }}</p>
 <form method="POST" action="{{ route('consents.publish') }}" x-data="{language:'en',templates:@js(config('consent')),version:@js(config('consent.en.version')),declaration:@js(config('consent.en.declaration')),receipt:@js(config('consent.en.receipt'))}" data-once>@csrf
 <label for="language">{{ __('Consent language') }}</label><select id="language" name="language" x-model="language" @change="version=templates[language].version;declaration=templates[language].declaration;receipt=templates[language].receipt"><option value="en">English</option><option value="rw">Kinyarwanda</option></select>
 <label for="version">{{ __('Version') }}</label><input id="version" name="version" x-model="version" required maxlength="80">
