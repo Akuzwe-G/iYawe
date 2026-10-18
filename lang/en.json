@@ -437,5 +437,12 @@
   "Save document branding": "Save document branding",
   "Thank you. Please return the phone to the staff member.": "Thank you. Please return the phone to the staff member.",
   "The archived PDF is unavailable. Contact your administrator.": "The archived PDF is unavailable. Contact your administrator.",
-  "These settings apply to documents and reports. The iYawe interface stays unchanged.": "These settings apply to documents and reports. The iYawe interface stays unchanged."
+  "These settings apply to documents and reports. The iYawe interface stays unchanged.": "These settings apply to documents and reports. The iYawe interface stays unchanged.",
+  "The supplied Kinyarwanda template is formally approved. An authorised member must publish it for this company before use.": "The supplied Kinyarwanda template is formally approved. An authorised member must publish it for this company before use.",
+  "I authorise replacing the currently active declaration for this language, if one exists.": "I authorise replacing the currently active declaration for this language, if one exists.",
+  "Explicitly authorise replacement of the current company declaration.": "Explicitly authorise replacement of the current company declaration.",
+  "Approving member ID": "Approving member ID",
+  "Legacy publication": "Legacy publication",
+  "The archived document is unavailable. Contact your administrator.": "The archived document is unavailable. Contact your administrator.",
+  "Document integrity verification failed.": "Document integrity verification failed."
 }

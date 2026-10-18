@@ -10,6 +10,6 @@ class ConsentVersion extends Model
 
     protected function casts(): array
     {
-        return ['approved_at' => 'datetime', 'active' => 'boolean'];
+        return ['publication_evidence' => 'array', 'approved_at' => 'datetime', 'active' => 'boolean'];
     }
 }

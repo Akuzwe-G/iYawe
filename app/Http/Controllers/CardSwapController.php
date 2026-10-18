@@ -4,11 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\SwapStepRequest;
 use App\Models\CardSwap;
-use App\Models\Company;
 use App\Models\ConsentVersion;
 use App\Models\Location;
 use App\Models\SwapSignature;
-use App\Support\Audit;
+use App\Support\ConsentPublisher;
+use App\Support\PrivateDocuments;
 use App\Support\SwapPdf;
 use App\Support\SwapQuery;
 use App\Support\SwapWorkflow;
@@ -18,9 +18,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -135,8 +133,7 @@ class CardSwapController extends Controller
         $record = $this->record($request, $swap);
         Gate::authorize('view', $record);
         $image = SwapSignature::where('company_id', $record->company_id)->where('card_swap_id', $record->id)->findOrFail($signature);
-        $bytes = Crypt::decryptString(Storage::disk('local')->get($image->path));
-        abort_unless(hash_equals($image->sha256, hash('sha256', $bytes)), 500);
+        $bytes = app(PrivateDocuments::class)->read($image->path, $image->sha256);
 
         return response($bytes, 200, ['Content-Type' => 'image/png', 'Cache-Control' => 'no-store, private', 'X-Content-Type-Options' => 'nosniff']);
     }
@@ -164,16 +161,8 @@ class CardSwapController extends Controller
         $company = $request->attributes->get('company');
         abort_unless($company, 403);
         Gate::authorize('administer', [$company, 'settings.manage']);
-        $data = $request->validate(['language' => ['required', 'in:en,rw'], 'version' => ['required', 'string', 'max:80'], 'declaration' => ['required', 'string', 'max:20000'], 'receipt' => ['required', 'string', 'max:4000'], 'approved' => ['accepted']]);
-        DB::transaction(function () use ($company, $data, $request) {
-            Company::whereKey($company->id)->lockForUpdate()->firstOrFail();
-            if (ConsentVersion::where('company_id', $company->id)->where('language', $data['language'])->where('version', $data['version'])->exists()) {
-                throw ValidationException::withMessages(['version' => __('Use a new version number. Signed versions are immutable.')]);
-            }
-            ConsentVersion::where('company_id', $company->id)->where('language', $data['language'])->update(['active' => false]);
-            $version = ConsentVersion::create(['company_id' => $company->id, 'language' => $data['language'], 'version' => $data['version'], 'declaration' => $data['declaration'], 'receipt' => $data['receipt'], 'approved_by' => $request->user()->id, 'approved_at' => now()]);
-            Audit::record('consent.version.published', $company->id, $version->id);
-        });
+        $data = $request->validate(['language' => ['required', 'in:en,rw'], 'version' => ['required', 'string', 'max:80'], 'declaration' => ['required', 'string', 'max:20000'], 'receipt' => ['required', 'string', 'max:4000'], 'approved' => ['accepted'], 'replace_current' => ['nullable', 'boolean']]);
+        app(ConsentPublisher::class)->publish($company, $request->user(), $data, $request->boolean('replace_current'));
 
         return back()->with('status', __('Consent version published.'));
     }

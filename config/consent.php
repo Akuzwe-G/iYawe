@@ -20,6 +20,7 @@ CONSENT,
     ],
     'rw' => [
         'version' => 'tapgo-rw-1.0',
+        'approval' => ['status' => 'approved', 'confirmed_on' => '2026-10-18', 'authority' => 'Product owner', 'reference' => 'Milestone 4 product-owner instruction'],
         'declaration' => <<<'CONSENT'
 Njyewe, umugenzi ushyize umukono kuri iyi fishi, ndemeza ko nasobanuriwe uburyo bwo guhindurirwa ikarita ya Tap&Go, kandi ko nemeye ku bushake bwanjye ko ikarita yanjye ihindurwa nk'uko byasobanuwe haruguru.
 

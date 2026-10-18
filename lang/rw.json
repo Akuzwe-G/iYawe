@@ -437,5 +437,12 @@
   "Save document branding": "Bika ibiranga inyandiko",
   "Thank you. Please return the phone to the staff member.": "Murakoze. Subiza umukozi telefone.",
   "The archived PDF is unavailable. Contact your administrator.": "PDF yabitswe ntiboneka. Menyesha umuyobozi wawe.",
-  "These settings apply to documents and reports. The iYawe interface stays unchanged.": "Aya magenamiterere akoreshwa ku nyandiko na raporo. Imigaragarire ya iYawe ikomeza uko isanzwe."
+  "These settings apply to documents and reports. The iYawe interface stays unchanged.": "Aya magenamiterere akoreshwa ku nyandiko na raporo. Imigaragarire ya iYawe ikomeza uko isanzwe.",
+  "The supplied Kinyarwanda template is formally approved. An authorised member must publish it for this company before use.": "Inyandiko y'Ikinyarwanda yatanzwe yemejwe ku mugaragaro. Umukozi ubifitiye uburenganzira agomba kuyitangaza kuri iki kigo mbere yo kuyikoresha.",
+  "I authorise replacing the currently active declaration for this language, if one exists.": "Nemereye gusimbuza inyandiko ikoreshwa muri uru rurimi, niba ihari.",
+  "Explicitly authorise replacement of the current company declaration.": "Emeza ku mugaragaro ko wemeye gusimbuza inyandiko y'ikigo ikoreshwa.",
+  "Approving member ID": "Nimero y'umukozi wemeje",
+  "Legacy publication": "Inyandiko yatangajwe mbere",
+  "The archived document is unavailable. Contact your administrator.": "Inyandiko yabitswe ntiboneka. Menyesha umuyobozi wawe.",
+  "Document integrity verification failed.": "Kugenzura ubunyangamugayo bw'inyandiko ntibyashobotse."
 }

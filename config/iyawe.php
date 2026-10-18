@@ -1,6 +1,8 @@
 <?php
 
 return [
+    'documents_disk' => env('IYAWE_DOCUMENTS_DISK', 'local'),
+    'trusted_proxies' => array_values(array_filter(explode(',', (string) env('IYAWE_TRUSTED_PROXIES', '')))),
     'system_admin' => [
         'name' => env('IYAWE_SYSTEM_ADMIN_NAME', 'iYawe System Administrator'),
         'email' => env('IYAWE_SYSTEM_ADMIN_EMAIL'),

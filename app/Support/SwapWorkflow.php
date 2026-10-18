@@ -7,7 +7,6 @@ use App\Models\ConsentVersion;
 use App\Models\SwapEvent;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Throwable;
@@ -92,7 +91,7 @@ class SwapWorkflow
             });
         } catch (Throwable $exception) {
             foreach ($paths as $path) {
-                Storage::disk('local')->delete($path);
+                app(PrivateDocuments::class)->disk()->delete($path);
             }
             throw $exception;
         }
@@ -134,7 +133,7 @@ class SwapWorkflow
             throw ValidationException::withMessages(['signature' => __('Please sign clearly before continuing.')]);
         }
         $path = 'swaps/'.$swap->company_id.'/'.$swap->id.'/'.Str::uuid().'.enc';
-        if (! Storage::disk('local')->put($path, Crypt::encryptString($png))) {
+        if (! app(PrivateDocuments::class)->disk()->put($path, Crypt::encryptString($png))) {
             throw new \RuntimeException('Unable to securely store signature.');
         }
         $paths[] = $path;

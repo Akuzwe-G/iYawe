@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\CardSwap;
 use App\Models\Company;
+use App\Models\ConsentVersion;
 use App\Models\User;
 use App\Support\CompanyAccess;
 use App\Support\DocumentBranding;
@@ -76,7 +77,7 @@ class SwapWorkflowSmokeTest extends TestCase
         $swap = $this->draft();
         $this->get('/swaps/'.$swap->id.'/continue')->assertOk();
         $this->capture('wizard-consent', $this->get('/swaps/'.$swap->id.'/continue')->getContent());
-        $this->post('/swaps/'.$swap->id.'/steps/3', ['revision' => 2, 'consent_version_id' => 1, 'consent_name' => 'Sample Commuter', 'acknowledged' => 1, 'signature' => $this->signature()])->assertSessionHasNoErrors();
+        $this->post('/swaps/'.$swap->id.'/steps/3', ['revision' => 2, 'consent_version_id' => ConsentVersion::where('company_id', $swap->company_id)->where('language', 'en')->where('active', true)->firstOrFail()->id, 'consent_name' => 'Sample Commuter', 'acknowledged' => 1, 'signature' => $this->signature()])->assertSessionHasNoErrors();
         $this->post('/swaps/'.$swap->id.'/steps/4', ['revision' => 3, 'outcome' => 'completed', 'physical_confirmation' => 1, 'remarks' => 'Physical verification complete', 'signature' => $this->signature()])->assertSessionHasNoErrors();
         app(DocumentBranding::class)->update($company, ['brand_legal_name' => 'Original Legal Name']);
         $this->post('/swaps/'.$swap->id.'/steps/5', ['revision' => 4, 'receipt_acknowledged' => 1, 'signature' => $this->signature()])->assertSessionHasNoErrors();
@@ -130,7 +131,7 @@ class SwapWorkflowSmokeTest extends TestCase
         $swap = $this->draft();
         $this->post('/swaps/'.$swap->id.'/steps/5', ['revision' => 2, 'receipt_acknowledged' => 1, 'signature' => $this->signature()])->assertConflict();
         $this->post('/consents', ['language' => 'en', 'version' => 'pending-v1', 'declaration' => config('consent.en.declaration'), 'receipt' => config('consent.en.receipt'), 'approved' => 1])->assertSessionHasNoErrors();
-        $this->post('/swaps/'.$swap->id.'/steps/3', ['revision' => 2, 'consent_version_id' => 1, 'consent_name' => 'Sample Commuter', 'acknowledged' => 1, 'signature' => $this->signature()])->assertSessionHasNoErrors();
+        $this->post('/swaps/'.$swap->id.'/steps/3', ['revision' => 2, 'consent_version_id' => ConsentVersion::where('company_id', $swap->company_id)->where('language', 'en')->where('active', true)->firstOrFail()->id, 'consent_name' => 'Sample Commuter', 'acknowledged' => 1, 'signature' => $this->signature()])->assertSessionHasNoErrors();
         $this->post('/swaps/'.$swap->id.'/steps/4', ['revision' => 3, 'outcome' => 'pending', 'signature' => $this->signature()])->assertSessionHasNoErrors();
         $this->assertSame('pending_processing', $swap->fresh()->status);
         app(DocumentBranding::class)->update($company, ['brand_legal_name' => 'Original Legal Name']);
@@ -158,7 +159,7 @@ class SwapWorkflowSmokeTest extends TestCase
         $this->get('/swaps/'.$swap->id.'/continue')->assertOk()->assertSee('No approved consent');
         $this->post('/swaps/'.$swap->id.'/steps/3', ['revision' => 2, 'consent_version_id' => 999, 'consent_name' => 'Sample Commuter', 'acknowledged' => 1, 'signature' => 'data:image/png;base64,'])->assertSessionHasErrors('consent_version_id');
         $this->post('/consents', ['language' => 'en', 'version' => 'blank-test', 'declaration' => config('consent.en.declaration'), 'receipt' => config('consent.en.receipt'), 'approved' => 1])->assertSessionHasNoErrors();
-        $this->post('/swaps/'.$swap->id.'/steps/3', ['revision' => 2, 'consent_version_id' => 1, 'consent_name' => 'Sample Commuter', 'acknowledged' => 1, 'signature' => 'data:image/png;base64,'])->assertSessionHasErrors('signature');
+        $this->post('/swaps/'.$swap->id.'/steps/3', ['revision' => 2, 'consent_version_id' => ConsentVersion::where('company_id', $swap->company_id)->where('language', 'en')->where('active', true)->firstOrFail()->id, 'consent_name' => 'Sample Commuter', 'acknowledged' => 1, 'signature' => 'data:image/png;base64,'])->assertSessionHasErrors('signature');
         $this->assertDatabaseCount('swap_signatures', 0);
     }
 
