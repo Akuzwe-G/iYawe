@@ -15,7 +15,8 @@ class SwapPdf
         return DB::transaction(function () use ($record) {
             $swap = CardSwap::where('company_id', $record->company_id)->lockForUpdate()->findOrFail($record->id);
             abort_unless($swap->status === 'completed', 409);
-            if ($swap->pdf_path && Storage::disk('local')->exists($swap->pdf_path)) {
+            if ($swap->pdf_path) {
+                abort_unless(Storage::disk('local')->exists($swap->pdf_path), 410, __('The archived PDF is unavailable. Contact your administrator.'));
                 $bytes = Crypt::decryptString(Storage::disk('local')->get($swap->pdf_path));
                 abort_unless(hash_equals($swap->pdf_hash, hash('sha256', $bytes)), 500);
 
@@ -32,10 +33,11 @@ class SwapPdf
             }
             $fontFiles = glob(resource_path('fonts/Montserrat-*.ttf'));
             $fontAvailable = count($fontFiles) >= 2;
+            $branding = app(DocumentBranding::class)->historical($swap);
             $originalLocale = app()->getLocale();
             try {
                 app()->setLocale($swap->consent_language);
-                $bytes = Pdf::loadView('swaps.pdf', compact('swap', 'images', 'fontAvailable'))->setPaper('a4')->setOptions(['isRemoteEnabled' => false, 'isPhpEnabled' => false, 'defaultFont' => 'DejaVu Sans', 'chroot' => [resource_path(), storage_path(), public_path()]])->output();
+                $bytes = Pdf::loadView('swaps.pdf', compact('swap', 'images', 'fontAvailable', 'branding'))->setPaper('a4')->setOptions(['isRemoteEnabled' => false, 'isPhpEnabled' => false, 'defaultFont' => 'DejaVu Sans', 'chroot' => [resource_path(), storage_path(), public_path()]])->output();
             } finally {
                 app()->setLocale($originalLocale);
             }

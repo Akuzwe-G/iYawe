@@ -1,0 +1,3 @@
+<meta name="csrf-token" content="{{ csrf_token() }}"><link rel="manifest" href="{{ asset('manifest.webmanifest') }}"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="apple-mobile-web-app-title" content="iYawe">
+@php($pwaVersion=is_file(public_path('pwa/version.json'))?(json_decode(file_get_contents(public_path('pwa/version.json')),true)['version']??'1'):'1')
+<link rel="apple-touch-icon" sizes="180x180" href="{{ asset('pwa/icons/icon-180.png') }}?v={{ $pwaVersion }}">

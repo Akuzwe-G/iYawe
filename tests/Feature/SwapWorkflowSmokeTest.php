@@ -6,6 +6,7 @@ use App\Models\CardSwap;
 use App\Models\Company;
 use App\Models\User;
 use App\Support\CompanyAccess;
+use App\Support\DocumentBranding;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
@@ -77,6 +78,7 @@ class SwapWorkflowSmokeTest extends TestCase
         $this->capture('wizard-consent', $this->get('/swaps/'.$swap->id.'/continue')->getContent());
         $this->post('/swaps/'.$swap->id.'/steps/3', ['revision' => 2, 'consent_version_id' => 1, 'consent_name' => 'Sample Commuter', 'acknowledged' => 1, 'signature' => $this->signature()])->assertSessionHasNoErrors();
         $this->post('/swaps/'.$swap->id.'/steps/4', ['revision' => 3, 'outcome' => 'completed', 'physical_confirmation' => 1, 'remarks' => 'Physical verification complete', 'signature' => $this->signature()])->assertSessionHasNoErrors();
+        app(DocumentBranding::class)->update($company, ['brand_legal_name' => 'Original Legal Name']);
         $this->post('/swaps/'.$swap->id.'/steps/5', ['revision' => 4, 'receipt_acknowledged' => 1, 'signature' => $this->signature()])->assertSessionHasNoErrors();
         $swap = $swap->fresh();
         $this->assertSame('completed', $swap->status);
@@ -87,6 +89,12 @@ class SwapWorkflowSmokeTest extends TestCase
         $this->get('/swaps/'.$swap->id.'/signatures/'.$swap->signatures->first()->id)->assertOk()->assertHeader('Content-Type', 'image/png');
         $this->get('/swaps/'.$swap->id.'/pdf')->assertOk()->assertHeader('Content-Type', 'application/pdf');
         $this->assertNotNull($swap->fresh()->pdf_path);
+        $this->assertSame('Original Legal Name', $swap->fresh()->branding_snapshot['legal_name']);
+        $originalPdfHash = $swap->fresh()->pdf_hash;
+        app(DocumentBranding::class)->update($company, ['brand_legal_name' => 'Changed Legal Name']);
+        $this->get('/swaps/'.$swap->id.'/pdf')->assertOk();
+        $this->assertSame($originalPdfHash, $swap->fresh()->pdf_hash);
+        $this->assertSame('Original Legal Name', app(DocumentBranding::class)->historical($swap->fresh())['legal_name']);
         $this->get('/records')->assertOk();
         $this->post('/records/search', ['search_by' => 'national_id', 'search' => 'TEST-12345'])->assertRedirect('/records?searching=1');
         $this->get('/records?searching=1')->assertOk()->assertSee($swap->reference);
@@ -125,6 +133,7 @@ class SwapWorkflowSmokeTest extends TestCase
         $this->post('/swaps/'.$swap->id.'/steps/3', ['revision' => 2, 'consent_version_id' => 1, 'consent_name' => 'Sample Commuter', 'acknowledged' => 1, 'signature' => $this->signature()])->assertSessionHasNoErrors();
         $this->post('/swaps/'.$swap->id.'/steps/4', ['revision' => 3, 'outcome' => 'pending', 'signature' => $this->signature()])->assertSessionHasNoErrors();
         $this->assertSame('pending_processing', $swap->fresh()->status);
+        app(DocumentBranding::class)->update($company, ['brand_legal_name' => 'Original Legal Name']);
         $this->post('/swaps/'.$swap->id.'/steps/5', ['revision' => 4, 'receipt_acknowledged' => 1, 'signature' => $this->signature()])->assertConflict();
         $this->post('/swaps/'.$swap->id.'/steps/4', ['revision' => 4, 'outcome' => 'unsuccessful', 'remarks' => 'Unable to replace card', 'signature' => $this->signature()])->assertSessionHasNoErrors();
         $this->assertSame('processing_unsuccessful', $swap->fresh()->status);

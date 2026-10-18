@@ -4,9 +4,9 @@
 @font-face{font-family:Montserrat;src:url("{{ resource_path('fonts/Montserrat-Bold.ttf') }}") format("truetype");font-weight:700}
 @endif
 @page{margin:34px 38px}body{font-family:{{ $fontAvailable?'Montserrat':'DejaVu Sans' }};font-size:9px;line-height:1.5;color:#172B4D}h1{font-size:17px;color:#1747A6}h2{font-size:12px;border-bottom:1px solid #ccd9e6;padding-bottom:5px;margin-top:18px}h3{font-size:10px}table{border-collapse:collapse;width:100%}td{padding:5px;border:1px solid #dce6ef;vertical-align:top;width:50%}.brand{font-size:26px;font-weight:bold;color:#1747A6}.muted{color:#63758e;font-size:8px}.consent{white-space:pre-wrap;font-size:8px}.signatures td{width:33%}.signatures img{width:150px;height:75px;object-fit:contain}.keep{page-break-inside:avoid}.footer{font-size:7px;color:#63758e;margin-top:22px}
-</style></head><body>
-<div class="brand">iYawe</div><h1>{{ __('TAP&GO COMMUTER CARD SWAP CONSENT AND AUTHORIZATION FORM') }}</h1>
-<p><strong>{{ __('Reference') }}:</strong> {{ $swap->reference }}<br><strong>{{ __('Company') }}:</strong> {{ $swap->company_name_snapshot }}<br>{{ __('Date') }}: {{ $swap->swap_date->format('d M Y') }}</p>
+.document-logo{max-width:150px;max-height:70px}.document-company{font-size:18px}.document-address,.document-footer{white-space:pre-wrap}.document-footer{border-top:1px solid #ccd9e6;padding-top:10px;margin-top:20px;font-size:8px}</style></head><body>
+@include('documents.header')<p class="muted">iYawe</p><h1>{{ __('TAP&GO COMMUTER CARD SWAP CONSENT AND AUTHORIZATION FORM') }}</h1>
+<p><strong>{{ __('Reference') }}:</strong> {{ $swap->reference }}<br><strong>{{ __('Company') }}:</strong> {{ $branding['legal_name'] }}<br>{{ __('Date') }}: {{ $swap->swap_date->format('d M Y') }}</p>
 <h2>1. {{ __('Commuter information') }}</h2><table><tr><td>{{ __('Commuter full name') }}<br><strong>{{ $swap->commuter_name }}</strong></td><td>{{ __('Phone number') }}<br>{{ $swap->phone }}</td></tr><tr><td>{{ __('National ID') }}<br>{{ $swap->national_id }}</td><td>{{ __('Email address') }}<br>{{ $swap->email ?: '—' }}</td></tr></table>
 <h2>2. {{ __('Card information') }}</h2><table><tr><td>{{ __('Existing card number') }}<br>{{ $swap->old_card }}<br>{{ __('Recorded balance') }}: {{ $swap->old_balance }} RWF</td><td>{{ __('Replacement card number') }}<br>{{ $swap->new_card }}<br>{{ __('Recorded balance') }}: {{ $swap->new_balance }} RWF</td></tr><tr><td>{{ __('Reason') }}: {{ __($swap->reason) }} {{ $swap->reason_other }}</td><td>{{ __('Location') }}: {{ $swap->signatures->where('purpose','consent')->first()->payload_snapshot['location_name_snapshot'] ?? '—' }}</td></tr></table>
 <h2>3–4. {{ __('Commuter consent and declaration') }}</h2><div class="consent">{{ $swap->consentVersion->declaration }}</div>
@@ -15,4 +15,4 @@
 <div class="keep"><table class="signatures"><tr>@foreach(['consent','staff','receipt'] as $purpose)<td><strong>{{ __($purpose.'_signature') }}</strong><br><img src="{{ $images[$purpose] }}"><br>{{ $purpose==='staff'?$swap->staff_name_snapshot:$swap->consent_name }}<br>{{ $swap->signatures->where('purpose',$purpose)->sortByDesc('revision')->first()->signed_at->format('d M Y H:i:s') }}</td>@endforeach</tr></table></div>
 <p class="muted">{{ __('Consent version') }}: {{ $swap->consentVersion->version }} · {{ strtoupper($swap->consent_language) }}<br>{{ __('Completed at') }}: {{ $swap->completed_at->format('d M Y H:i:s') }} {{ config('app.timezone') }}</p>
 <p class="footer">{{ __('iYawe records acknowledgements only. It does not transfer balances or deactivate cards.') }}</p>
-</body></html>
+@include('documents.footer')</body></html>

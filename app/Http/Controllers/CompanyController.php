@@ -6,6 +6,7 @@ use App\Http\Requests\CompanyRequest;
 use App\Models\Company;
 use App\Support\Audit;
 use App\Support\CompanyAccess;
+use App\Support\DocumentBranding;
 use App\Support\MembershipManager;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -38,7 +39,8 @@ class CompanyController extends Controller
     {
         $record = $company ? Company::findOrFail($company) : new Company;
         DB::transaction(function () use ($record, $request) {
-            $record->fill($request->validated())->save();
+            $record->fill($request->safe()->only(['name', 'slug', 'email', 'phone', 'status']))->save();
+            app(DocumentBranding::class)->update($record, $request->validated(), $request->file('brand_logo'));
             CompanyAccess::provision($record);
             Audit::record('company.saved', $record->id, $record->id);
         });

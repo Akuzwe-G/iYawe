@@ -8,7 +8,7 @@ use Spatie\Permission\Models\Role;
 
 class CompanyAccess
 {
-    public const PERMISSIONS = ['staff.manage', 'roles.manage', 'locations.manage', 'settings.manage', 'reports.view', 'field.access', 'acknowledgements.create', 'records.search', 'pdf.view', 'swaps.create', 'swaps.view', 'swaps.view-all', 'swaps.update-pending', 'swaps.complete', 'swaps.download', 'reports.export'];
+    public const PERMISSIONS = ['staff.manage', 'roles.manage', 'locations.manage', 'settings.manage', 'reports.view', 'field.access', 'acknowledgements.create', 'records.search', 'pdf.view', 'swaps.create', 'swaps.view', 'swaps.view-all', 'swaps.update-pending', 'swaps.complete', 'swaps.download', 'reports.export', 'branding.manage'];
 
     public static function provision(Company $company): void
     {

@@ -1,7 +1,10 @@
+import {initWorkflow} from './workflow';
+import {initPwa} from './pwa';
 import Alpine from 'alpinejs';
 import SignaturePad from 'signature_pad';
 import Chart from 'chart.js/auto';
 
+const messages = JSON.parse(document.getElementById('iyawe-messages')?.textContent || '{}');
 window.Alpine = Alpine;
 Alpine.start();
 
@@ -44,7 +47,7 @@ for (const canvas of document.querySelectorAll('canvas[data-chart]')) {
     } catch (error) {
         canvas.parentElement.querySelector('[data-chart-loading]')?.remove();
         const message = document.createElement('p');
-        message.textContent = document.documentElement.lang === 'rw' ? 'Reba imibare mu mbonerahamwe hepfo.' : 'View the figures in the data table below.';
+        message.textContent = messages.chart;
         canvas.replaceWith(message);
     }
 }
@@ -73,8 +76,8 @@ for (const box of document.querySelectorAll('[data-signature]')) {
     new ResizeObserver(resize).observe(canvas.parentElement);
     resize();
     const guide = box.querySelector('.signing-guide');
-    pad.addEventListener('beginStroke', () => { guide.hidden = true; box.querySelector('.signature-error').hidden = true; });
-    box.querySelector('[data-clear]').addEventListener('click', () => { pad.clear(); box.querySelector('input[name="signature"]').value = ''; guide.hidden = false; });
+    pad.addEventListener('beginStroke', () => { box.closest('form').dispatchEvent(new Event('signature-change')); guide.hidden = true; box.querySelector('.signature-error').hidden = true; });
+    box.querySelector('[data-clear]').addEventListener('click', () => { pad.clear(); box.closest('form').dispatchEvent(new Event('signature-change')); box.querySelector('input[name="signature"]').value = ''; guide.hidden = false; });
     const expandButton = box.querySelector('[data-expand]');
     const originalLabel = expandButton.textContent;
     const collapse = () => { box.classList.remove('signature-expanded'); document.body.classList.remove('signing'); expandButton.textContent = originalLabel; };
@@ -82,7 +85,7 @@ for (const box of document.querySelectorAll('[data-signature]')) {
         if (box.classList.contains('signature-expanded')) collapse();
         else {
             box.classList.add('signature-expanded'); document.body.classList.add('signing');
-            expandButton.textContent = document.documentElement.lang === 'rw' ? 'Garuka ku ifishi' : 'Return to form';
+            expandButton.textContent = messages.returnForm;
         }
     });
     document.addEventListener('keydown', event => { if (event.key === 'Escape') collapse(); });
@@ -97,7 +100,9 @@ for (const box of document.querySelectorAll('[data-signature]')) {
     });
 }
 
-for (const form of document.querySelectorAll('form[data-once]')) {
+initWorkflow();
+initPwa();
+for (const form of document.querySelectorAll('form[data-once]:not([data-workflow])')) {
     form.addEventListener('submit', event => {
         if (event.defaultPrevented) return;
         if (form.dataset.submitting) { event.preventDefault(); return; }
@@ -107,7 +112,7 @@ for (const form of document.querySelectorAll('form[data-once]')) {
     });
 }
 window.addEventListener('pageshow', () => {
-    for (const form of document.querySelectorAll('form[data-once]')) {
+    for (const form of document.querySelectorAll('form[data-once]:not([data-workflow])')) {
         delete form.dataset.submitting; form.removeAttribute('aria-busy');
         form.querySelectorAll('button[type="submit"], button:not([type])').forEach(button => { button.disabled = false; });
     }

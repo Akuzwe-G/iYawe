@@ -38,4 +38,14 @@ $validation['attributes'] = array_merge($validation['attributes'], [
     'commuter_name' => "Amazina y'umugenzi", 'consent_name' => "Amazina y'usinya", 'national_id' => 'Irangamuntu', 'phone' => 'Telefoni', 'old_card' => 'Ikarita isanzwe', 'new_card' => 'Ikarita nshya', 'old_balance' => "Amafaranga y'ikarita isanzwe", 'new_balance' => "Amafaranga y'ikarita nshya", 'swap_date' => 'Itariki', 'signature' => 'Umukono', 'reason' => 'Impamvu', 'reason_other' => 'Indi mpamvu', 'remarks' => 'Ibisobanuro', 'from' => 'Itariki itangira', 'to' => 'Itariki irangira', 'receipt_acknowledged' => 'Kwemeza kwakira', 'acknowledged' => 'Kwemera', 'physical_confirmation' => 'Kwemeza gusimbuza', 'consent_version_id' => 'Verisiyo yo kwemera', 'outcome' => 'Ibyavuye mu gutunganya', 'declaration' => 'Inyandiko yo kwemera', 'receipt' => 'Icyemezo cyo kwakira',
 ]);
 
+$validation['file'] = ':attribute igomba kuba dosiye.';
+$validation['mimes'] = ':attribute igomba kuba dosiye ya: :values.';
+$validation['mimetypes'] = ':attribute igomba kuba dosiye ya: :values.';
+$validation['dimensions'] = "Ingano y'ishusho ya :attribute ntiyemewe.";
+$validation['uploaded'] = 'Kohereza :attribute ntibyashobotse.';
+$validation['max']['file'] = ':attribute ntigomba kurenza KB :max.';
+$validation['attributes'] = array_merge($validation['attributes'], [
+    'brand_display_name' => "Izina ry'ikigo rigaragara", 'brand_legal_name' => "Izina ryemewe ry'ikigo", 'brand_address' => "Aderesi y'ikigo", 'brand_email' => 'Imeyili yo ku nyandiko', 'brand_phone' => 'Telefoni yo ku nyandiko', 'brand_report_title' => 'Umutwe wa raporo', 'brand_footer' => 'Amagambo yo hasi ku nyandiko', 'brand_logo' => "Ikirango cy'ikigo", 'brand_remove_logo' => 'Gukuraho ikirango', 'revision' => 'Verisiyo', 'step' => 'Intambwe',
+]);
+
 return $validation;

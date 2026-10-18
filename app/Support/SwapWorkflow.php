@@ -77,6 +77,7 @@ class SwapWorkflow
                     $this->event($swap, $data['outcome'] === 'completed' ? 'processing.physically_completed' : ($data['outcome'] === 'pending' ? 'processing.pending' : 'processing.unsuccessful'));
                 } else {
                     abort_unless($step === 5 && $swap->physical_completed_at && $swap->verified_at && $swap->signatures()->where('purpose', 'staff')->exists(), 409);
+                    $swap->branding_snapshot = app(DocumentBranding::class)->finalise($swap);
                     $swap->completed_at = now();
                     $swap->status = 'completed';
                     $swap->step = 5;

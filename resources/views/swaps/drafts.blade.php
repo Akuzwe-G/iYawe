@@ -1,0 +1,8 @@
+@extends('layouts.app')
+@section('title',__('My Drafts'))
+@section('content')
+<div class="page-heading"><div><h1>{{ __('My Drafts') }}</h1><p>{{ __('Resume your securely saved, unsigned acknowledgements.') }}</p></div><a class="primary" href="{{ route('swaps.create') }}">{{ __('New Card Swap') }}</a></div>
+<section class="panel"><div class="table-scroll"><table class="record-table"><thead><tr><th>{{ __('Reference') }}</th><th>{{ __('Commuter') }}</th><th>{{ __('Last saved') }}</th><th>{{ __('Current step') }}</th><th>{{ __('Actions') }}</th></tr></thead><tbody>@forelse($drafts as $draft)<tr>
+<td data-label="{{ __('Reference') }}">{{ $draft->reference }}</td><td data-label="{{ __('Commuter') }}">{{ $draft->commuter_name?mb_substr($draft->commuter_name,0,1).'•••':'—' }}</td><td data-label="{{ __('Last saved') }}">{{ $draft->updated_at->format('d M Y H:i') }}</td><td data-label="{{ __('Current step') }}">{{ $draft->step }}/5</td>
+<td data-label="{{ __('Actions') }}"><div class="row-actions"><a href="{{ route('swaps.edit',$draft) }}">{{ __('Resume') }}</a><form method="POST" action="{{ route('drafts.discard',$draft) }}" x-data @submit="if(!confirm(@js(__('Discard this unsigned draft? Its audit history will be retained.')))) $event.preventDefault()">@csrf @method('DELETE')<input type="hidden" name="revision" value="{{ $draft->revision }}"><button class="secondary compact">{{ __('Discard') }}</button></form></div></td></tr>@empty<tr><td colspan="5" class="empty-state">{{ __('No drafts to resume.') }}</td></tr>@endforelse</tbody></table></div>{{ $drafts->links() }}</section>
+@endsection

@@ -12,6 +12,11 @@ class Company extends Model
 
     protected $fillable = ['name', 'slug', 'email', 'phone', 'status'];
 
+    protected function casts(): array
+    {
+        return ['document_branding' => 'encrypted:array'];
+    }
+
     public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class)->withPivot('active', 'pending', 'display_name')->withTimestamps();

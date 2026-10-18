@@ -2,6 +2,12 @@
 @section('title',$swap->reference)
 @section('content')
 <div class="page-heading"><div><a class="back-link" href="{{ route('swaps.index') }}">← {{ __('Records') }}</a><h1>{{ $swap->reference }}</h1><p><span class="badge status-{{ $swap->status }}">{{ __($swap->status) }}</span> · {{ $swap->swap_date?->format('d M Y') }}</p></div><div class="row-actions">@can('update',$swap)<a class="primary" href="{{ route('swaps.edit',$swap) }}">{{ __('Continue acknowledgement') }}</a>@endcan @can('download',$swap)<a class="primary" href="{{ route('swaps.pdf',$swap) }}">{{ __('Download PDF') }}</a><a class="secondary" href="{{ route('swaps.pdf',[$swap,'inline'=>1]) }}" target="_blank" rel="noopener">{{ __('View / Print PDF') }}</a>@endcan</div></div>
+@if($swap->completed_at)
+<section class="panel confirmation-summary"><h2>{{ __('Acknowledgement completed') }}</h2><dl class="detail-grid">
+@foreach(['Reference'=>$swap->reference,'Completed at'=>$swap->completed_at->format('d M Y H:i').' '.config('app.timezone'),'Commuter full name'=>mb_substr($swap->commuter_name,0,1).'•••','Existing card number'=>$swap->maskedCard($swap->old_card),'Replacement card number'=>$swap->maskedCard($swap->new_card),'Verified by'=>$swap->staff_name_snapshot] as $label=>$value)<div><dt>{{ __($label) }}</dt><dd>{{ $value }}</dd></div>@endforeach
+</dl><div class="form-actions"><a class="secondary" href="{{ route('swaps.index') }}">{{ __('Back to Records') }}</a>@can('create',\App\Models\CardSwap::class)<a class="primary" href="{{ route('swaps.create') }}">{{ __('New Card Swap') }}</a>@endcan</div></section>
+@endif
+<details class="record-details" @if(!$swap->completed_at) open @endif><summary>{{ __('View authorised record details') }}</summary>
 <section class="panel"><h2>{{ __('Commuter information') }}</h2><dl class="detail-grid">
 @foreach(['Commuter full name'=>$swap->commuter_name,'Phone number'=>$swap->phone,'Email address'=>$swap->email,'National ID'=>$swap->national_id,'Location'=>$swap->location?->name] as $label=>$value)<div><dt>{{ __($label) }}</dt><dd>{{ $value ?: '—' }}</dd></div>@endforeach
 </dl></section>
@@ -11,4 +17,5 @@
 @if($swap->consentVersion)<section class="panel"><h2>{{ __('Signed declaration') }}</h2><p class="helper">{{ $swap->consentVersion->version }} · {{ strtoupper($swap->consent_language) }}</p><div class="consent-copy" lang="{{ $swap->consent_language }}"><p>{{ $swap->consentVersion->declaration }}</p></div>@if($swap->completed_at)<h3>{{ __('Receipt confirmation') }}</h3><p lang="{{ $swap->consent_language }}">{{ $swap->consentVersion->receipt }}</p>@endif</section>@endif
 <div class="signature-history">@foreach($swap->signatures->sortBy('id') as $signature)<section class="panel"><h2>{{ __($signature->purpose.'_signature') }}</h2><img class="saved-signature" src="{{ route('swaps.signature',[$swap,$signature]) }}" alt="{{ __($signature->purpose.'_signature') }}" loading="lazy"><p class="helper">{{ __('Revision') }} {{ $signature->revision }} · {{ $signature->signed_at->format('d M Y H:i:s') }} {{ config('app.timezone') }}</p>@if($signature->purpose==='staff')<p class="helper">{{ __('Verified by') }}: {{ $signature->payload_snapshot['staff_name_snapshot'] ?? '—' }} · {{ __('Remarks') }}: {{ $signature->payload_snapshot['remarks'] ?? '—' }}</p>@endif</section>@endforeach</div>
 <section class="panel"><h2>{{ __('Audit trail') }}</h2><ol class="event-list">@foreach($swap->events as $event)<li><strong>{{ __($event->type) }}</strong><span>{{ $event->actor?->name }} · {{ $event->created_at->format('d M Y H:i:s') }} {{ config('app.timezone') }}</span></li>@endforeach</ol></section>
+</details>
 @endsection

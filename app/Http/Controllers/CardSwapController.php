@@ -12,6 +12,7 @@ use App\Support\Audit;
 use App\Support\SwapPdf;
 use App\Support\SwapQuery;
 use App\Support\SwapWorkflow;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
@@ -56,7 +57,8 @@ class CardSwapController extends Controller
         $request->validate(['submission_key' => ['required', 'uuid']]);
         $company = $request->attributes->get('company');
         $swap = DB::transaction(function () use ($request, $workflow, $company) {
-            $swap = CardSwap::firstOrCreate(['company_id' => $company->id, 'created_by' => $request->user()->id, 'submission_key' => $request->input('submission_key')], ['reference' => 'IY-'.now()->format('Ymd').'-'.Str::ulid(), 'swap_date' => today(), 'status' => 'draft', 'step' => 1]);
+            $swap = CardSwap::withTrashed()->firstOrCreate(['company_id' => $company->id, 'created_by' => $request->user()->id, 'submission_key' => $request->input('submission_key')], ['reference' => 'IY-'.now()->format('Ymd').'-'.Str::ulid(), 'swap_date' => today(), 'status' => 'draft', 'step' => 1]);
+            abort_if($swap->trashed(), 409, __('This record changed. Reload before continuing.'));
             if ($swap->wasRecentlyCreated) {
                 $workflow->event($swap, 'acknowledgement.created');
             }
@@ -75,26 +77,45 @@ class CardSwapController extends Controller
         return view('swaps.show', ['swap' => $record->load(['creator', 'verifier', 'location', 'consentVersion', 'signatures', 'events.actor'])]);
     }
 
-    public function edit(Request $request, int $swap): View
+    public function edit(Request $request, int $swap): View|RedirectResponse
     {
         $record = $this->record($request, $swap);
+        $customerMode = (int) $request->session()->get('customer_handoff.swap_id') === $record->id;
+        if ($customerMode && ($record->step !== (int) $request->session()->get('customer_handoff.step') || $record->status === 'completed')) {
+            return redirect()->route('customer.done', $record);
+        }
         Gate::authorize('update', $record);
 
-        return view('swaps.wizard', ['swap' => $record->load('consentVersion'), 'locations' => Location::where('company_id', $record->company_id)->where('active', true)->get(), 'consents' => ConsentVersion::where('company_id', $record->company_id)->where('active', true)->get()]);
+        return view('swaps.wizard', ['customerMode' => $customerMode, 'swap' => $record->load('consentVersion'), 'locations' => Location::where('company_id', $record->company_id)->where('active', true)->get(), 'consents' => ConsentVersion::where('company_id', $record->company_id)->where('active', true)->when($customerMode, fn ($query) => $query->where('language', $request->session()->get('customer_handoff.locale')))->get()]);
     }
 
-    public function advance(SwapStepRequest $request, SwapWorkflow $workflow, int $swap, int $step): RedirectResponse
+    public function advance(SwapStepRequest $request, SwapWorkflow $workflow, int $swap, int $step): RedirectResponse|JsonResponse
     {
         $record = $this->record($request, $swap);
         Gate::authorize($step >= 4 ? 'complete' : 'update', $record);
+        if ($step === 3 && $request->session()->has('customer_handoff')) {
+            abort_unless(ConsentVersion::where('company_id', $record->company_id)->where('language', $request->session()->get('customer_handoff.locale'))->whereKey($request->integer('consent_version_id'))->exists(), 422, __('Please check the form.'));
+        }
         $record = $workflow->advance($record, $step, $request->validated());
 
-        return redirect()->route(in_array($record->status, ['completed', 'processing_unsuccessful']) ? 'swaps.show' : 'swaps.edit', $record)->with('status', __('Acknowledgement saved.'));
+        $target = $request->session()->has('customer_handoff') ? route('customer.done', $record) : route(in_array($record->status, ['completed', 'processing_unsuccessful']) ? 'swaps.show' : 'swaps.edit', $record);
+        if ($request->expectsJson()) {
+            $message = $record->status === 'completed' ? __('Acknowledgement completed') : ($step >= 3 ? __('Signature recorded') : __('Acknowledgement saved.'));
+            $request->session()->flash('status', $message);
+
+            return response()->json(['saved' => true, 'redirect' => $target, 'message' => $message])->header('Cache-Control', 'no-store, private');
+        }
+
+        return redirect($target)->with('status', __('Acknowledgement saved.'));
     }
 
     public function back(Request $request, SwapWorkflow $workflow, int $swap): RedirectResponse
     {
         $record = $this->record($request, $swap);
+        $customerMode = (int) $request->session()->get('customer_handoff.swap_id') === $record->id;
+        if ($customerMode && ($record->step !== (int) $request->session()->get('customer_handoff.step') || $record->status === 'completed')) {
+            return redirect()->route('customer.done', $record);
+        }
         Gate::authorize('update', $record);
         $request->validate(['revision' => ['required', 'integer'], 'step' => ['required', 'integer', 'in:1,2']]);
         DB::transaction(function () use ($record, $request, $workflow) {
@@ -161,8 +182,8 @@ class CardSwapController extends Controller
     {
         $queries->filters($queries->visible($request), $request);
         $criteria = $request->only(['search', 'search_by', 'from', 'to', 'status', 'reason', 'staff', 'location']);
-        $request->session()->put('swap_search',Crypt::encryptString(json_encode(['company_id' => $request->attributes->get('company')->id, 'criteria' => $criteria],JSON_THROW_ON_ERROR)));
+        $request->session()->put('swap_search', Crypt::encryptString(json_encode(['company_id' => $request->attributes->get('company')->id, 'criteria' => $criteria], JSON_THROW_ON_ERROR)));
 
-        return redirect()->route('swaps.index',['searching' => 1]);
+        return redirect()->route('swaps.index', ['searching' => 1]);
     }
 }

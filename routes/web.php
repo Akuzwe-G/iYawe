@@ -1,16 +1,20 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BrandingController;
 use App\Http\Controllers\CardSwapController;
 use App\Http\Controllers\CompanyController;
+use App\Http\Controllers\CustomerModeController;
+use App\Http\Controllers\DraftController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\StaffController;
 use App\Http\Controllers\WorkspaceController;
+use App\Http\Middleware\CustomerHandoff;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', fn () => redirect()->route(auth()->check() ? 'dashboard' : 'login'))->name('home');
-Route::post('/language', [AuthController::class, 'locale'])->middleware('throttle:30,1')->name('locale');
+Route::post('/language', [AuthController::class, 'locale'])->middleware([CustomerHandoff::class, 'throttle:30,1'])->name('locale');
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'login'])->name('login');
     Route::post('/login', [AuthController::class, 'authenticate'])->middleware('throttle:20,1')->name('login.store');
@@ -19,8 +23,18 @@ Route::middleware('guest')->group(function () {
     Route::get('/reset-password/{token}', [AuthController::class, 'reset'])->name('password.reset');
     Route::post('/reset-password', [AuthController::class, 'updatePassword'])->middleware('throttle:5,1')->name('password.update');
 });
-Route::middleware(['auth', 'company.context'])->group(function () {
+Route::middleware(['auth', 'company.context', CustomerHandoff::class])->group(function () {
 
+    Route::get('/drafts', [DraftController::class, 'index'])->name('drafts.index');
+    Route::patch('/swaps/{swap}/draft', [DraftController::class, 'save'])->whereNumber('swap')->middleware('throttle:60,1,draft-save')->name('drafts.save');
+    Route::delete('/swaps/{swap}/draft', [DraftController::class, 'discard'])->whereNumber('swap')->name('drafts.discard');
+    Route::post('/swaps/{swap}/customer', [CustomerModeController::class, 'enter'])->whereNumber('swap')->name('customer.enter');
+    Route::get('/swaps/{swap}/customer/done', [CustomerModeController::class, 'done'])->whereNumber('swap')->name('customer.done');
+    Route::post('/swaps/{swap}/customer/return', [CustomerModeController::class, 'leave'])->whereNumber('swap')->middleware('throttle:5,1,staff-unlock')->name('customer.return');
+    Route::get('/settings/branding', [BrandingController::class, 'edit'])->name('branding.edit');
+    Route::put('/settings/branding', [BrandingController::class, 'update'])->name('branding.update');
+    Route::get('/reports/print', [ReportController::class, 'document'])->name('reports.print');
+    Route::get('/reports/pdf', [ReportController::class, 'document'])->middleware('throttle:5,1,report-pdf')->name('reports.pdf');
     Route::get('/swaps/create', [CardSwapController::class, 'create'])->name('swaps.create');
     Route::post('/swaps', [CardSwapController::class, 'store'])->middleware('throttle:30,1,swap-write')->name('swaps.store');
     Route::post('/records/search', [CardSwapController::class, 'search'])->middleware('throttle:30,1,record-search')->name('swaps.search');

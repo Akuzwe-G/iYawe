@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class CardSwap extends Model
 {
-    use HasFactory;
+    use HasFactory, \Illuminate\Database\Eloquent\SoftDeletes;
 
     public const STATUSES = ['draft', 'consent_signed', 'pending_processing', 'processing_unsuccessful', 'completed'];
 
@@ -21,7 +21,7 @@ class CardSwap extends Model
 
     protected function casts(): array
     {
-        return ['commuter_name' => 'encrypted', 'phone' => 'encrypted', 'email' => 'encrypted', 'national_id' => 'encrypted', 'old_card' => 'encrypted', 'new_card' => 'encrypted', 'reason_other' => 'encrypted', 'remarks' => 'encrypted', 'consent_name' => 'encrypted', 'company_name_snapshot' => 'encrypted', 'staff_name_snapshot' => 'encrypted', 'old_balance' => 'decimal:2', 'new_balance' => 'decimal:2', 'swap_date' => 'date', 'consent_signed_at' => 'datetime', 'verified_at' => 'datetime', 'physical_completed_at' => 'datetime', 'completed_at' => 'datetime'];
+        return ['branding_snapshot' => 'encrypted:array', 'commuter_name' => 'encrypted', 'phone' => 'encrypted', 'email' => 'encrypted', 'national_id' => 'encrypted', 'old_card' => 'encrypted', 'new_card' => 'encrypted', 'reason_other' => 'encrypted', 'remarks' => 'encrypted', 'consent_name' => 'encrypted', 'company_name_snapshot' => 'encrypted', 'staff_name_snapshot' => 'encrypted', 'old_balance' => 'decimal:2', 'new_balance' => 'decimal:2', 'swap_date' => 'date', 'consent_signed_at' => 'datetime', 'verified_at' => 'datetime', 'physical_completed_at' => 'datetime', 'completed_at' => 'datetime'];
     }
 
     public function creator(): BelongsTo

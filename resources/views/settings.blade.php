@@ -24,4 +24,4 @@
 <label for="support_email">{{ __('Support email') }}</label><input id="support_email" name="support_email" type="email" value="{{ $platformPreferences['support_email'] }}">
 <button class="primary">{{ __('Save platform settings') }}</button></form></section>
 @endif
-@endsection
+@if($activeCompany)@can('branding.manage')<section class="panel"><h2>{{ __('Document Branding') }}</h2><p>{{ __('Manage the company identity used on PDFs and reports.') }}</p><a class="primary" href="{{ route('branding.edit') }}">{{ __('Edit document branding') }}</a></section>@endcan @endif @include('pwa.settings')@endsection
