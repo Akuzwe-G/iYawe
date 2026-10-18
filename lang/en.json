@@ -468,6 +468,6 @@
   "Choose an active location for your company.": "Choose an active location for your company.",
   "No active locations are available. Ask your company administrator to add one before continuing.": "No active locations are available. Ask your company administrator to add one before continuing.",
   "Choose an active location before signing. Use Back to update this unsigned draft.": "Choose an active location before signing. Use Back to update this unsigned draft.",
-  "Enter a whole-number balance from 100 to 49,999 RWF.": "Enter a whole-number balance from 100 to 49,999 RWF.",
+  "Enter a whole-number balance from 0 to 49,999 RWF.": "Enter a whole-number balance from 0 to 49,999 RWF.",
   "The existing and replacement card balances must be equal.": "The existing and replacement card balances must be equal."
 }

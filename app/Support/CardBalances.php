@@ -10,7 +10,7 @@ use Illuminate\Validation\Validator as LaravelValidator;
 
 class CardBalances
 {
-    public const MESSAGE = 'Enter a whole-number balance from 100 to 49,999 RWF.';
+    public const MESSAGE = 'Enter a whole-number balance from 0 to 49,999 RWF.';
 
     public const EQUAL_MESSAGE = 'The existing and replacement card balances must be equal.';
 
@@ -23,7 +23,7 @@ class CardBalances
     public static function rules(bool $draft = false): array
     {
         return ['bail', $draft ? 'nullable' : 'required', function (string $attribute, mixed $value, Closure $fail): void {
-            if ((! is_string($value) && ! is_int($value)) || ! preg_match('/\A[0-9]+\z/D', (string) $value) || (int) $value < 100 || (int) $value > 49999) {
+            if ((! is_string($value) && ! is_int($value)) || ! preg_match('/\A[0-9]+\z/D', (string) $value) || (int) $value < 0 || (int) $value > 49999) {
                 $fail(__(self::MESSAGE));
             }
         }];

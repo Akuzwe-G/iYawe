@@ -1,5 +1,5 @@
 export function balanceIssue(value, otherValue = '') {
-    const valid = input => typeof input === 'string' && /^[0-9]+$/.test(input) && Number(input) >= 100 && Number(input) <= 49999;
+    const valid = input => typeof input === 'string' && /^[0-9]+$/.test(input) && Number(input) >= 0 && Number(input) <= 49999;
     if (!valid(value)) return 'format';
     if (valid(otherValue) && Number(value) !== Number(otherValue)) return 'different';
     return null;

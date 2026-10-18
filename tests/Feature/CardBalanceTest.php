@@ -61,7 +61,7 @@ class CardBalanceTest extends TestCase
 
     public function test_both_balances_accept_inclusive_whole_number_boundaries(): void
     {
-        foreach ([100, '49999', '00100'] as $value) {
+        foreach ([0, '0', 50, '50', 99, '99', 100, '49999', '00100'] as $value) {
             $record = $this->record();
             $this->assertSame(1, $record->balance_validation_version);
             $this->postJson('/swaps/'.$record->id.'/steps/2', $this->cards($value, $value))->assertOk();
@@ -73,7 +73,7 @@ class CardBalanceTest extends TestCase
     public function test_both_balances_reject_out_of_range_fractional_and_non_numeric_values(): void
     {
         $record = $this->record(['old_balance' => '500', 'new_balance' => '500']);
-        foreach ([99, 50000, 0, -1, '100.01', '100.00', '99.99', 'abc', '1e3', '1,000', '', null, ['100'], true, 100.25] as $value) {
+        foreach ([50000, -1, '100.01', '100.00', '99.99', 'abc', '1e3', '1,000', '', null, ['100'], true, 100.25] as $value) {
             foreach (['old_balance', 'new_balance'] as $field) {
                 $this->postJson('/swaps/'.$record->id.'/steps/2', array_replace($this->cards('100', '100'), [$field => $value]))->assertUnprocessable()->assertJsonValidationErrors($field);
             }
@@ -105,11 +105,17 @@ class CardBalanceTest extends TestCase
         $this->assertSame('200.00', $record->fresh()->new_balance);
         $this->assertSame(1, $record->fresh()->balance_validation_version);
         $this->assertSame(2, $record->fresh()->step);
+        $zero = $this->record();
+        $this->patchJson('/swaps/'.$zero->id.'/draft', ['revision' => 0, 'step' => 2, 'old_balance' => 0, 'new_balance' => '0'])->assertOk();
+        $this->assertSame('0.00', $zero->fresh()->old_balance);
+        $this->assertSame('0.00', $zero->fresh()->new_balance);
+        $this->get('/swaps/'.$zero->id.'/continue')->assertOk()->assertSee('value="0"', false);
+        $this->postJson('/swaps/'.$zero->id.'/steps/2', array_replace($this->cards('0', '0'), ['revision' => 1]))->assertOk();
     }
 
     public function test_physical_completion_rechecks_saved_balances_before_writing_signatures(): void
     {
-        foreach ([['100', '200'], ['99', '99'], ['50000', '50000'], ['100.25', '100.25']] as [$old, $new]) {
+        foreach ([['0', '50'], ['-1', '-1'], ['50000', '50000'], ['100.25', '100.25']] as [$old, $new]) {
             $record = $this->record(['step' => 4, 'status' => 'consent_signed', 'consent_signed_at' => now(), 'old_balance' => $old, 'new_balance' => $new]);
             $this->consentSignature($record);
             $original = $record->signatures()->firstOrFail()->getRawOriginal('payload_snapshot');
@@ -118,10 +124,12 @@ class CardBalanceTest extends TestCase
             $this->assertSame(1, $record->signatures()->count());
             $this->assertSame($original, $record->signatures()->firstOrFail()->getRawOriginal('payload_snapshot'));
         }
-        $record = $this->record(['step' => 4, 'status' => 'consent_signed', 'consent_signed_at' => now(), 'old_balance' => '49999', 'new_balance' => '49999']);
-        $this->consentSignature($record);
-        $this->postJson('/swaps/'.$record->id.'/steps/4', ['revision' => 0, 'outcome' => 'completed', 'physical_confirmation' => 1, 'signature' => $this->signature()])->assertOk();
-        $this->assertSame(5, $record->fresh()->step);
+        foreach ([0, 50, 99, 49999] as $balance) {
+            $record = $this->record(['step' => 4, 'status' => 'consent_signed', 'consent_signed_at' => now(), 'old_balance' => $balance, 'new_balance' => $balance]);
+            $this->consentSignature($record);
+            $this->postJson('/swaps/'.$record->id.'/steps/4', ['revision' => 0, 'outcome' => 'completed', 'physical_confirmation' => 1, 'signature' => $this->signature()])->assertOk();
+            $this->assertSame(5, $record->fresh()->step);
+        }
     }
 
     public function test_receipt_completion_cannot_bypass_the_saved_balance_checks(): void
@@ -139,7 +147,7 @@ class CardBalanceTest extends TestCase
         $record = $this->record();
         foreach (['en', 'rw'] as $locale) {
             auth()->user()->forceFill(['locale' => $locale])->save();
-            $this->postJson('/swaps/'.$record->id.'/steps/2', $this->cards('99', '100'))->assertUnprocessable()->assertJsonPath('errors.old_balance.0', __(CardBalances::MESSAGE, [], $locale));
+            $this->postJson('/swaps/'.$record->id.'/steps/2', $this->cards('-1', '100'))->assertUnprocessable()->assertJsonPath('errors.old_balance.0', __(CardBalances::MESSAGE, [], $locale));
             $this->postJson('/swaps/'.$record->id.'/steps/2', $this->cards('100', '101'))->assertUnprocessable()->assertJsonPath('errors.new_balance.0', __(CardBalances::EQUAL_MESSAGE, [], $locale));
         }
     }

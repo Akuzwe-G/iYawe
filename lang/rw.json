@@ -468,6 +468,6 @@
   "Choose an active location for your company.": "Hitamo ahantu hakorera serivisi za sosiyete yawe.",
   "No active locations are available. Ask your company administrator to add one before continuing.": "Nta hantu hatangirwa serivisi hahari. Saba umuyobozi wa sosiyete yawe kongeramo aho serivisi itangirwa mbere yo gukomeza.",
   "Choose an active location before signing. Use Back to update this unsigned draft.": "Hitamo ahantu hatangirwa serivisi mbere yo gusinya. Kanda Subira inyuma ukosore iyi nyandiko itarasinywa.",
-  "Enter a whole-number balance from 100 to 49,999 RWF.": "Andika amafaranga yuzuye kuva ku 100 kugeza ku 49,999 RWF.",
+  "Enter a whole-number balance from 0 to 49,999 RWF.": "Andika amafaranga yuzuye kuva ku 0 kugeza ku 49,999 RWF.",
   "The existing and replacement card balances must be equal.": "Amafaranga ari ku ikarita isanzwe n'ari ku ikarita nshya agomba kuba angana."
 }
