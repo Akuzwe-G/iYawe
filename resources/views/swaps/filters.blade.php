@@ -1,4 +1,5 @@
-<form method="{{ ($report??false)?'GET':'POST' }}" action="{{ route(($report??false)?'reports.index':'swaps.search') }}" class="record-filters">@if(!($report??false))@csrf@endif
+<form method="{{ ($report??false)?'GET':'POST' }}" action="{{ route(($report??false)?'reports.index':'swaps.search') }}" class="record-filters">@if(!($report??false))@csrf
+@endif
 @if(!($report??false))
 <div><label for="search_by">{{ __('Search by') }}</label><select id="search_by" name="search_by">@foreach(['reference'=>'Reference','national_id'=>'National ID','old_card'=>'Existing card','new_card'=>'Replacement card','name'=>'Exact customer name'] as $value=>$label)<option value="{{ $value }}" @selected(request('search_by','reference')===$value)>{{ __($label) }}</option>@endforeach</select></div>
 <div><label for="search">{{ __('Exact search value') }}</label><input id="search" name="search" value="{{ request('search') }}" maxlength="180" autocomplete="off"></div>@endif

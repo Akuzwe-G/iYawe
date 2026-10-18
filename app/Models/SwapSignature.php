@@ -8,7 +8,7 @@ class SwapSignature extends Model
 {
     protected $guarded = ['id'];
 
-    protected $hidden = ['path'];
+    protected $hidden = ['path', 'payload_snapshot'];
 
     protected function casts(): array
     {

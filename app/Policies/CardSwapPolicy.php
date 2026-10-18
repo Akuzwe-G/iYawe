@@ -27,7 +27,7 @@ class CardSwapPolicy
 
     public function update(User $user, CardSwap $swap): bool
     {
-        return $this->view($user, $swap) && ! in_array($swap->status, ['completed', 'processing_unsuccessful']) && $user->can('swaps.update-pending');
+        return $this->view($user, $swap) && ! in_array($swap->status, ['completed', 'processing_unsuccessful']) && $user->can('swaps.update-pending') && ($swap->step < 4 || $user->can('swaps.complete'));
     }
 
     public function complete(User $user, CardSwap $swap): bool

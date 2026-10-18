@@ -58,7 +58,7 @@ class TenantSecurityTest extends TestCase
         $this->post('/company/switch', ['company_id' => $b->id])->assertRedirect('/dashboard')->assertSessionHas('company_id', $b->id);
         $this->get('/staff')->assertForbidden();
         $this->get('/roles')->assertForbidden();
-        $this->get('/dashboard')->assertOk()->assertSee($b->name)->assertSee('Coming in Milestone 2');
+        $this->get('/dashboard')->assertOk()->assertSee($b->name)->assertSee('New Card Swap');
         $this->post('/company/switch', ['company_id' => $a->id])->assertRedirect('/dashboard');
         $this->get('/roles')->assertOk();
         $this->assertNull(getPermissionsTeamId());

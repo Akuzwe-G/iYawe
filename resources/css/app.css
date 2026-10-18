@@ -200,3 +200,6 @@ body.signing { overflow:hidden; }
  .signature-expanded .section-heading .helper,.signature-expanded .signature-tools .helper { display:none; }
  .signature-expanded .section-heading { margin-bottom:8px; }.signature-expanded .signature-tools { margin-top:8px; }
 }
+
+@media(max-width:760px) and (max-height:690px) { .login-story { display:none; } }
+.table-scroll { max-width:100%;min-width:0; }

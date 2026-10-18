@@ -72,8 +72,8 @@ class SwapAnalytics
             $months = CardSwap::whereBetween('swap_date', [$start->toDateString(), $end->toDateString()])->selectRaw('SUBSTR(swap_date,1,7) as month, COUNT(*) as total')->groupBy('month')->orderBy('month')->pluck('total', 'month');
             $charts[] = $this->chart('Platform activity by month', 'bar', $months->keys()->all(), [['label' => __('Acknowledgements'), 'data' => $months->values()->map(fn ($n) => (int) $n)->all()]]);
             $charts[] = $this->chart('Company status (all time)', 'doughnut', [__('Active companies'), __('Suspended companies')], [['data' => [Company::where('status', 'active')->count(), Company::where('status', 'suspended')->count()]]]);
-        } elseif ($company && $request->user()->can('swaps.view')) {
-            $all = $request->user()->can('swaps.view-all') && $request->user()->can('reports.view');
+        } elseif ($company && ($request->user()->can('swaps.view') || $request->user()->can('reports.view'))) {
+            $all = $request->user()->can('reports.view');
             $base = CardSwap::where('company_id', $company->id)->whereBetween('swap_date', [$start->toDateString(), $end->toDateString()])->when(! $all, fn ($q) => $q->where('created_by', $request->user()->id));
             $summary = $this->summary($base);
             $metrics = [['Total acknowledgements', $summary['total']], ['Completed', $summary['completed']], ['Pending', $summary['pending']], ['Unsuccessful', $summary['unsuccessful']]];
@@ -105,9 +105,11 @@ class SwapAnalytics
                     $charts[] = $this->chart('Swaps by location', 'bar', $places->map(fn ($r) => $locationNames[$r->location_id] ?? '—')->all(), [['label' => __('Acknowledgements'), 'data' => $places->pluck('total')->map(fn ($n) => (int) $n)->all()]], true);
                 }
             }
-            $recent = (clone $base)->with('creator')->latest()->limit(8)->get();
+            $recent = $request->user()->can('swaps.view') ? (clone $base)->when(! $request->user()->can('swaps.view-all'), fn ($q) => $q->where('created_by', $request->user()->id))->with('creator')->latest()->limit(8)->get() : collect();
         }
 
-        return compact('metrics','charts','recent','platform','start','end');
+        $recentCompanies = $platform ? Company::whereBetween('created_at', [$start->startOfDay(), $end->endOfDay()])->latest()->limit(5)->get() : collect();
+
+        return compact('metrics', 'charts', 'recent', 'platform', 'start', 'end', 'recentCompanies');
     }
 }

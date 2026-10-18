@@ -1,6 +1,6 @@
-# iYawe — Milestone 1
+# iYawe — Milestones 1 and 2
 
-Multi-company digital acknowledgement foundation built with Laravel 13, PHP 8.3+, Blade, Tailwind 4, Alpine.js 3 and Spatie Permission 8. Card swap processing, signatures, PDFs, reports and PWA installation belong to later milestones.
+Multi-company digital acknowledgement foundation built with Laravel 13, PHP 8.3+, Blade, Tailwind 4, Alpine.js 3 and Spatie Permission 8. Card swap acknowledgements, signatures, PDFs, reports and analytics are implemented in Milestone 2. PWA installation remains a future milestone. See [MILESTONE2.md](MILESTONE2.md) for workflow, mobile layout, consent activation and verification details.
 
 ## Start locally
 
@@ -112,7 +112,7 @@ Use `php artisan route:list --except-vendor` for the complete route list. The ro
 
 The local mailer is currently `log`. Recovery is hidden and its endpoints return 404 with this mailer so reset tokens are never logged. Configure a supported real mailer (for example `MAIL_MAILER=smtp` and the appropriate MAIL_HOST/MAIL_PORT/MAIL_USERNAME/MAIL_PASSWORD/MAIL_FROM_ADDRESS), then run `php artisan config:clear` to enable recovery. Delivery depends on a working mail server. Unit tests use Laravel's in-memory mail transport.
 
-Deploy with HTTPS, `APP_DEBUG=false`, the correct APP_URL, and `SESSION_SECURE_COOKIE=true`. Retain the existing APP_KEY and protect the environment file. Reports and the permissions for future record/PDF operations have no active screens in this milestone. No sample business activity is generated. Kinyarwanda translations should receive a native-speaker review before public rollout.
+Deploy with HTTPS, `APP_DEBUG=false`, the correct APP_URL, and `SESSION_SECURE_COOKIE=true`. Retain the existing APP_KEY and protect the environment file. Milestone 2 adds active records, PDF and reporting screens; see MILESTONE2.md. No sample business activity is generated. Kinyarwanda translations should receive a native-speaker review before public rollout.
 
 ## Verification
 
@@ -125,7 +125,7 @@ php artisan migrate:status
 
 Actual verification results are recorded below. This workspace has no Git repository, so Pint's --dirty option is unavailable; run Pint normally.
 
-## Completed verification
+## Milestone 1 verification
 
 - MySQL: all seven migrations applied successfully, including four additive milestone migrations. Existing tables and data were retained.
 - Full automated suite: 32 tests passed, 245 assertions.

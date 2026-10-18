@@ -23,6 +23,7 @@ for (const canvas of document.querySelectorAll('canvas[data-chart]')) {
             pointHitRadius: 12,
         }));
         const isDoughnut = config.type === 'doughnut';
+        canvas.parentElement.querySelector('[data-chart-loading]')?.remove();
         new Chart(canvas, {
             type: config.type,
             data: { labels: config.labels, datasets },
@@ -41,6 +42,7 @@ for (const canvas of document.querySelectorAll('canvas[data-chart]')) {
             },
         });
     } catch (error) {
+        canvas.parentElement.querySelector('[data-chart-loading]')?.remove();
         const message = document.createElement('p');
         message.textContent = document.documentElement.lang === 'rw' ? 'Reba imibare mu mbonerahamwe hepfo.' : 'View the figures in the data table below.';
         canvas.replaceWith(message);
@@ -56,7 +58,7 @@ for (const box of document.querySelectorAll('[data-signature]')) {
         const width = Math.floor(canvas.getBoundingClientRect().width);
         const height = Math.floor(canvas.getBoundingClientRect().height);
         if (!width || !height || (width === oldWidth && height === oldHeight)) return;
-        const ratio = Math.min(window.devicePixelRatio || 1, 2);
+        const ratio = Math.min(window.devicePixelRatio || 1, 2, 2048 / width, 2048 / height);
         const strokes = pad.toData();
         const scaleX = oldWidth ? width / oldWidth : 1;
         const scaleY = oldHeight ? height / oldHeight : 1;

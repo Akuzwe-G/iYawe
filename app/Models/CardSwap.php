@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use Carbon\CarbonImmutable;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -65,5 +67,10 @@ class CardSwap extends Model
     public function maskedCard(?string $value): string
     {
         return $value ? str_repeat('•', max(4, mb_strlen($value) - 4)).mb_substr($value, -4) : '—';
+    }
+
+    protected function swapDate(): Attribute
+    {
+        return Attribute::make(set: fn ($value) => $value ? CarbonImmutable::parse($value)->toDateString() : null);
     }
 }

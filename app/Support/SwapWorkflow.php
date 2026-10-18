@@ -137,6 +137,7 @@ class SwapWorkflow
             throw new \RuntimeException('Unable to securely store signature.');
         }
         $paths[] = $path;
-        $swap->signatures()->create(['company_id' => $swap->company_id, 'captured_by' => auth()->id(), 'purpose' => $purpose, 'revision' => $swap->revision + 1, 'path' => $path, 'sha256' => hash('sha256',$png), 'payload_hash' => hash('sha256',json_encode($swap->attributesToArray(),JSON_THROW_ON_ERROR)), 'payload_snapshot' => $swap->attributesToArray(), 'signed_at' => now()]);
+        $snapshot = $swap->attributesToArray() + ['location_name_snapshot' => $swap->location?->name, 'signature_purpose' => $purpose];
+        $swap->signatures()->create(['company_id' => $swap->company_id, 'captured_by' => auth()->id(), 'purpose' => $purpose, 'revision' => $swap->revision + 1, 'path' => $path, 'sha256' => hash('sha256', $png), 'payload_hash' => hash('sha256', json_encode($snapshot, JSON_THROW_ON_ERROR)), 'payload_snapshot' => $snapshot, 'signed_at' => now()]);
     }
 }

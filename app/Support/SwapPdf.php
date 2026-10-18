@@ -32,7 +32,13 @@ class SwapPdf
             }
             $fontFiles = glob(resource_path('fonts/Montserrat-*.ttf'));
             $fontAvailable = count($fontFiles) >= 2;
-            $bytes = Pdf::loadView('swaps.pdf', compact('swap', 'images', 'fontAvailable'))->setPaper('a4')->setOptions(['isRemoteEnabled' => false, 'isPhpEnabled' => false, 'defaultFont' => 'DejaVu Sans', 'chroot' => [resource_path(), storage_path(), public_path()]])->output();
+            $originalLocale = app()->getLocale();
+            try {
+                app()->setLocale($swap->consent_language);
+                $bytes = Pdf::loadView('swaps.pdf', compact('swap', 'images', 'fontAvailable'))->setPaper('a4')->setOptions(['isRemoteEnabled' => false, 'isPhpEnabled' => false, 'defaultFont' => 'DejaVu Sans', 'chroot' => [resource_path(), storage_path(), public_path()]])->output();
+            } finally {
+                app()->setLocale($originalLocale);
+            }
             $path = 'swaps/'.$swap->company_id.'/'.$swap->id.'/acknowledgement.enc';
             if (! Storage::disk('local')->put($path, Crypt::encryptString($bytes))) {
                 throw new \RuntimeException('Unable to securely store PDF.');

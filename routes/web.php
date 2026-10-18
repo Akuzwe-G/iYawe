@@ -22,17 +22,17 @@ Route::middleware('guest')->group(function () {
 Route::middleware(['auth', 'company.context'])->group(function () {
 
     Route::get('/swaps/create', [CardSwapController::class, 'create'])->name('swaps.create');
-    Route::post('/swaps', [CardSwapController::class, 'store'])->middleware('throttle:30,1')->name('swaps.store');
-    Route::post('/records/search', [CardSwapController::class, 'search'])->middleware('throttle:30,1')->name('swaps.search');
+    Route::post('/swaps', [CardSwapController::class, 'store'])->middleware('throttle:30,1,swap-write')->name('swaps.store');
+    Route::post('/records/search', [CardSwapController::class, 'search'])->middleware('throttle:30,1,record-search')->name('swaps.search');
     Route::get('/records', [CardSwapController::class, 'index'])->name('swaps.index');
     Route::get('/swaps/{swap}', [CardSwapController::class, 'show'])->whereNumber('swap')->name('swaps.show');
     Route::get('/swaps/{swap}/continue', [CardSwapController::class, 'edit'])->whereNumber('swap')->name('swaps.edit');
-    Route::post('/swaps/{swap}/steps/{step}', [CardSwapController::class, 'advance'])->whereNumber('swap')->where('step', '[1-5]')->middleware('throttle:30,1')->name('swaps.advance');
+    Route::post('/swaps/{swap}/steps/{step}', [CardSwapController::class, 'advance'])->whereNumber('swap')->where('step', '[1-5]')->middleware('throttle:30,1,swap-write')->name('swaps.advance');
     Route::post('/swaps/{swap}/back', [CardSwapController::class, 'back'])->whereNumber('swap')->name('swaps.back');
     Route::get('/swaps/{swap}/signatures/{signature}', [CardSwapController::class, 'signature'])->whereNumber(['swap', 'signature'])->name('swaps.signature');
     Route::get('/swaps/{swap}/pdf', [CardSwapController::class, 'pdf'])->whereNumber('swap')->name('swaps.pdf');
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
-    Route::get('/reports/export', [ReportController::class, 'export'])->middleware('throttle:5,1')->name('reports.export');
+    Route::get('/reports/export', [ReportController::class, 'export'])->middleware('throttle:5,1,report-export')->name('reports.export');
     Route::get('/consents', [CardSwapController::class, 'consents'])->name('consents.index');
     Route::post('/consents', [CardSwapController::class, 'publishConsent'])->name('consents.publish');
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
