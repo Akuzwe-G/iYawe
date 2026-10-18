@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="iyawe" x1="0" y1="0" x2="1" y2=".45">
+      <stop stop-color="#1747A6"/>
+      <stop offset=".55" stop-color="#1689B9"/>
+      <stop offset="1" stop-color="#16B78C"/>
+    </linearGradient>
+  </defs>
+  <path fill="url(#iyawe)" d="M17 4h30a13 13 0 0 1 13 13v30a13 13 0 0 1-13 13H8a4 4 0 0 1-4-4V17A13 13 0 0 1 17 4Z"/>
+  <g fill="#FFFFFF">
+    <circle cx="32" cy="19" r="5"/>
+    <rect x="27" y="29" width="10" height="23" rx="3"/>
+  </g>
+</svg>

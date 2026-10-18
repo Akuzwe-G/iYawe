@@ -1,0 +1,2 @@
+@props(['name','label','value'=>null,'type'=>'text','required'=>false])
+<div class="field"><label for="{{ $name }}">{{ __($label) }}@if($required)<span aria-hidden="true"> *</span>@endif</label><input id="{{ $name }}" name="{{ $name }}" type="{{ $type }}" value="{{ old($name,$value) }}" @required($required) {{ $attributes }} @error($name) aria-invalid="true" aria-describedby="{{ $name }}_error" @enderror>@error($name)<p class="field-error" id="{{ $name }}_error">{{ $message }}</p>@enderror</div>
